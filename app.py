@@ -1,10 +1,10 @@
 #IMPORTS BEGIN
 from distutils.log import debug
 from flask import Flask,session,render_template,request,redirect,g,url_for
-from flask_security import Security,login_required
+from flask_security import Security,login_required,login_user
 from flask_security.utils import hash_password
 from flask_restful import Api
-from models.models import user_datastore
+from models.models import User, user_datastore
 import os
 from application.configuration import appConfig
 from db.database import db
@@ -31,17 +31,19 @@ security = Security(app,user_datastore)
 # ROUTE FOR ROOT (LOGIN, SIGNIN, SIGNUP)
 @app.route('/',methods=["GET","POST"])
 def root():
-    print(g) #debug
     #try:
         #print(g.user)
-    #if request.method == "POST":
-    #    user_datastore.create_user(username=request.form["username"],email=request.form["email"],password=hash_password(request.form["password"]))
-    #    db.session.commit()
+    if request.method == "POST":
+        if request.get_json()['context'] == 'SIGNIN':
+            user_datastore.create_user(username=request.get_json()["username"],email=request.get_json()["email"],password=hash_password(request.get_json()["password"]))
+            db.session.commit()
+            user = User(username=request.get_json()["username"],email=request.get_json()["email"],password=hash_password(request.get_json()["password"]))
+            login_user(user)
+            return render_template('dashboard.html')
     if request.method == 'GET':
-        if g.user:
-            return redirect(url_for('dashboard'))
-    session.clear()
-    return render_template("root.html")
+        #if g.user:
+    #session.clear()
+        return render_template("root.html")
     #except:
         #return render_template("error.html")
 

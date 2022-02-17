@@ -56,17 +56,40 @@ Vue.component('signup',{
             console.log("DEBUG : root-signup-block submitted")
             fetch("http://localhost:5000/validate",{method:'POST',headers:{'Content-Type':'application/json'},
             body:JSON.stringify({'username':this.username,'email':this.email})})
-            .then(function(response){
+            .then((response)=>{
                 if (!response.ok) {
                     console.log("Response not ok");
                 }
                 return response.json();
-            }).then(function(data){
+            }).then((data)=>{
                 console.log("Got data",data);
+                if (data['username_in_use']){
+                    this.username_in_use = true;
+                    console.log("DEBUG : username in use")
+                }
+                if (data['email_in_use']){
+                    this.email_in_use = true;
+                    console.log("DEBUG : email in use")
+                }
+
+                if (!data['username_in_use'] && !data['email_in_use']){
+                    fetch("http://localhost:5000/",{method:'POST',headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({'username':this.username,'email':this.email,'password':this.password,'context':'SIGNIN'})}).then((response) => {
+                  return response.text();
+              }).then((response)=>{
+                window.location.href = 'http://localhost:5000/dashboard'
+              })
+
+
+                    //fetch("http://localhost:5000/",{method:'POST',headers:{'Content-Type':'application/json'},
+                    //body:JSON.stringify({'username':this.username,'email':this.email,'password':this.password,'context':'SIGNIN'})})
+                    //console.log("DEBUG : VALID REGISTRATION");
+                }
             })
-            .catch(function(error){
+            .catch((error)=>{
                 console.log("Caught error",error)
             });
+            this.loading=false;
         }
     },
 })
