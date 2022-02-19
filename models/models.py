@@ -1,0 +1,45 @@
+import email
+from flask_security import SQLAlchemyUserDatastore,UserMixin,RoleMixin
+from sqlalchemy.sql.schema import Column, ForeignKey
+from db.database import db
+
+role_user_relation = db.Table("roles_users",
+Column("user_id", db.Integer,db.ForeignKey("users.id")),
+Column("role_id", db.Integer,db.ForeignKey("roles.id")))
+
+class User(db.Model,UserMixin):
+    __tablename__ = "users"
+    id = Column(db.Integer,primary_key=True,autoincrement=True)
+    email = Column(db.String,unique=True,nullable=False)
+    username = Column(db.String,unique=True,nullable=False)
+    password = Column(db.String,nullable=False)
+    active = Column(db.Boolean)
+    confirmed_at = Column(db.DateTime)
+    roles = db.relationship(
+        'Role',
+        secondary=role_user_relation,
+        backref=db.backref('users',lazy='dynamic')
+    )
+
+class Role(db.Model,RoleMixin):
+    __tablename__ = "roles"
+    id = Column(db.Integer,primary_key=True)
+    name = Column(db.String,nullable=False)
+    description = Column(db.String)
+
+'''class Card(db.Model):
+    __tablename__ = "cards"
+    card_id = Column(db.Integer,primary_key=True,autoincrement=True)
+    question = Column(db.String,nullable=False)
+    answer = Column(db.String,nullable=False)
+    deck_id = Column(db.Integer, db.ForeignKey("decks.deck_id"),nullable=False)
+
+class Deck(db.Model):
+    __tablename__ = "decks"
+    deck_id = Column(db.Integer,primary_key=True,autoincrement=True)
+    name = Column(db.String,nullable=False)
+    description = Column(db.String,nullable=False)
+    user_id = Column(db.Integer, db.ForeignKey("users.user_id"),nullable=False)
+    private = Column(db.Boolean, nullable=False)'''
+
+user_datastore = SQLAlchemyUserDatastore(db,User,Role)

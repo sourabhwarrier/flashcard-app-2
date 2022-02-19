@@ -1,0 +1,40 @@
+body {
+    background-color:#5596e6;
+}
+
+.root-signup-block{
+    background-color: aqua;
+    height:auto;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    text-align: left;
+   }
+
+.root-btn-submit1{
+    border-radius: 10px;
+    margin-top: 10px;
+    width: 265px;
+    padding: 10px 30px 10px 30px;
+}
+
+.root-label1{
+    padding-left: 0px;
+    padding-right: 18px;
+}
+
+.line{
+    margin:0px;
+    padding-top: 1px;
+}
+
+.root-input1{
+    width: 265px;
+    border-radius: 5px;
+    border-style: groove;
+    border-color:darkcyan;
+    height: 40px;
+}
