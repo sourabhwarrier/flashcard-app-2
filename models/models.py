@@ -15,6 +15,7 @@ class User(db.Model,UserMixin):
     password = Column(db.String,nullable=False)
     active = Column(db.Boolean)
     confirmed_at = Column(db.DateTime)
+    fs_uniquifier = Column(db.String,nullable=False)
     roles = db.relationship(
         'Role',
         secondary=role_user_relation,
