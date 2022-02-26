@@ -1,3 +1,4 @@
+from ast import Pass
 from logging import error
 from flask_restful import Resource
 from flask import request,jsonify
@@ -7,6 +8,7 @@ from controllers.functions_1 import email_exists, get_user_by_username, sha3512,
 from models.models import User, user_datastore
 from db.database import db
 
+# USER VALIDATION API
 class UserValAPI(Resource):
     def get(self):
         print("DEBUG : UserValAPI : GET ")
@@ -37,6 +39,7 @@ class UserValAPI(Resource):
     def delete(self):
         pass
 
+# USER LOGIN API
 class UserLoginAPI(Resource):
     def get(self):
         print("DEBUG : UserLoginAPI : post ")
@@ -83,5 +86,21 @@ class UserLoginAPI(Resource):
             return {'success':False}
         #except:
             #return "INTERNAL SERVER ERROR",500
+    def delete(self):
+        pass
+
+
+# WHOAMI API
+class WhoamiAPI(Resource):
+    def get(self):
+        print(current_user.is_authenticated)
+        if current_user.is_authenticated:
+            return {"authenticated": True,"me":current_user.username},200
+        else:
+            return {"authenticated": False,"me":None},200
+    def put(self):
+        pass
+    def post(self):
+        pass
     def delete(self):
         pass

@@ -1,4 +1,5 @@
 #IMPORTS BEGIN
+from crypt import methods
 from distutils.log import debug
 from controllers.functions_1 import get_user_by_username, sha3512
 from flask import Flask,session,render_template,request,redirect,g,url_for
@@ -9,7 +10,7 @@ from models.models import User, user_datastore
 import os
 from application.configuration import appConfig
 from db.database import db
-from api.api import UserLoginAPI, UserValAPI
+from api.api import UserLoginAPI, UserValAPI, WhoamiAPI
 
 #IMPORTS END
 
@@ -29,28 +30,14 @@ security = Security(app,user_datastore)
 # INITIALIZATION END
 
 # ROUTE FOR ROOT (LOGIN, SIGNIN, SIGNUP)
-@app.route('/',methods=["GET","POST"])
+@app.route('/',methods=["GET"])
 def root():
     print("User logged in : ",current_user.is_authenticated)
     try:
-        if not current_user.is_authenticated:
-            if request.method == "POST":
-                if request.get_json()['context'] == 'LOGIN':
-                    user = get_user_by_username(request.get_json()["username"])
-                    print("Logging in user : ",user)
-                    login_user(user)
-                    return redirect(url_for('dashboard'))
-                if request.get_json()['context'] == 'SIGNIN':
-                    user_datastore.create_user(username=request.get_json()["username"],email=request.get_json()["email"],password=sha3512(request.get_json()["password"]))
-                    db.session.commit()
-                    user = get_user_by_username("user1")
-                    print(user)
-                    login_user(user)
-                    return redirect(url_for('dashboard'))
-            elif request.method == 'GET':
-                return render_template("root.html")
+        if current_user.is_authenticated:
+            return redirect(url_for('dashboard'))
         else:
-            return redirect(url_for("dashboard"))
+            return render_template("root.html")
     except:
         return redirect(url_for("error.html"))
 
@@ -58,7 +45,7 @@ def root():
 @app.route('/dashboard',methods=["GET","POST"])
 def dashboard():
     if current_user.is_authenticated:
-        print("User logged in : ",current_user.is_authenticated)
+        print("User logged in : ",current_user.is_authenticated, " as : ", current_user.username)
         return render_template("dashboard.html")
     else:
         print("User logged in : ",current_user.is_authenticated)
@@ -67,9 +54,13 @@ def dashboard():
     #    return redirect(url_for("error.html"))
 
 
+# ROUTE FOR ERROR
+@app.route('/error', methods=["GET"])
+def error():
+    return render_template("error.html")
 
 
-# ENTRY POINT
+# ENTRY
 @app.before_request
 def before_request():
     g.user = None
@@ -79,6 +70,7 @@ def before_request():
 # API RESOURCES
 api.add_resource(UserValAPI,"/api-validate")
 api.add_resource(UserLoginAPI,"/api-login")
+api.add_resource(WhoamiAPI,'/api-whoami')
 
 if __name__== "__main__":
     app.run(debug=True)

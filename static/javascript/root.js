@@ -20,6 +20,7 @@ const start = Vue.component('start',{
         <router-link to="/signup">
             <button class="root-btn-submit1">Sign Up</button>
         </router-link>
+        </br class="line">
         <router-link to="/login">
             <button class="root-btn-submit1">Log In</button>
         </router-link>
