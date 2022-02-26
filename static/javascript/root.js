@@ -114,14 +114,17 @@ const signup = Vue.component('signup',{
             <input type="password" class="root-input1" v-model="password">
             </br class="line">
             <button class="root-btn-submit1" @click=submit()>Sign Up</button>
+            </br class="line">
             <router-link to="/login">
                 <button class="root-btn-submit1">Log In</button>
             </router-link>
             <p v-if="somethingwrong">Unable to register. Something went wrong :(</p>
-            <p v-if= "invalid_email || email_in_use || username_in_use">Please fix the following errors</p>
+            <p v-if= "invalid_email || email_in_use || username_in_use || username_length_incorrect || password_length_incorrect">Please fix the following errors</p>
             <p v-if="invalid_email">Invalid Email</p>
             <p v-if="email_in_use">Email in use</p>
             <p v-if="username_in_use">Username in use</p>
+            <p v-if="username_length_incorrect">Username length must be > 4</p>
+            <p v-if="password_length_incorrect">Password length must be > 5</p>
         </div>
         </div>
     `,
@@ -134,6 +137,8 @@ const signup = Vue.component('signup',{
         invalid_email:false,
         email_in_use:false,
         username_in_use:false,
+        username_length_incorrect: false,
+        password_length_incorrect: false,
         username:'',
         email:'',
         password:''
@@ -142,12 +147,47 @@ const signup = Vue.component('signup',{
 
     // COMPONENT METHODS
     methods:{
+            emailregex: function(mail) {
+                this.username_length_incorrect = false;
+                this.password_length_incorrect = false;
+            if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)){
+                return (true);
+                }
+            else {
+                alert("invalid email address");
+                return (false);
+                }
+            },
+
         // FUNCTION SUBMIT
         submit:function(){
+            const url_api_validate = 'http://'+window.location.host+'/api-validate';
+            const url_dashboard = 'http://'+window.location.host+'/dashboard';
+            if (this.username.length<5 || this.password.length<6){
+                if (this.username.length <=4){
+                    console.log("username length incorrect");
+                    this.username_length_incorrect = true;
+                    }
+                else {
+                    this.username_length_incorrect = false;
+                }
+                if (this.password.length <6){
+                    console.log("password length incorrect");
+                    this.password_length_incorrect = true;
+                    }
+                else {
+                    this.password_length_incorrect = false;
+                    }
+                return;
+                }
+            if (!this.emailregex(this.email)){
+                return;
+            }
             this.loading=true;
             console.log("DEBUG : root-signup-block submitted")
-            fetch("http://localhost:5000/api-validate",{method:'POST',headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({'username':this.username,'email':this.email})})
+            fetch(url_api_validate,{method:'GET',headers:{'Content-Type':'application/json','username':this.username,'email':this.email},
+            //body:JSON.stringify({'username':this.username,'email':this.email})
+        })
             .then((response)=>{
                 if (!response.ok) {
                     console.log("Response not ok");
@@ -159,23 +199,36 @@ const signup = Vue.component('signup',{
                     this.username_in_use = true;
                     console.log("DEBUG : username in use")
                 }
+                else{
+                    this.username_in_use = false;
+                }
                 if (data['email_in_use']){
                     this.email_in_use = true;
                     console.log("DEBUG : email in use")
                 }
+                else{
+                    this.email_in_use = false;
+                }
 
                 if (!data['username_in_use'] && !data['email_in_use']){
-                    fetch("http://localhost:5000/",{method:'POST',headers:{'Content-Type':'application/json'},
+                    fetch(url_api_validate,{method:'POST',headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({'username':this.username,'email':this.email,'password':this.password,'context':'SIGNIN'})}).then((response) => {
-                  return response.text();
-              }).then((response)=>{
-                window.location.href = 'http://localhost:5000/dashboard'
+                  //return response.text();
+                  if (!response.ok) {
+                    console.log("Response not ok");
+                }
+                return response.json();
+                
               })
-
-
-                    //fetch("http://localhost:5000/",{method:'POST',headers:{'Content-Type':'application/json'},
-                    //body:JSON.stringify({'username':this.username,'email':this.email,'password':this.password,'context':'SIGNIN'})})
-                    //console.log("DEBUG : VALID REGISTRATION");
+              .then((data)=>{
+                console.log("Got data",data);
+                if (data['success']){
+                    console.log("DEBUG : logging in")
+                    window.location.href = url_dashboard;
+                }
+                else{
+                    console.log("unable to login")
+                }})
                 }
             })
             .catch((error)=>{
@@ -206,13 +259,16 @@ const login = Vue.component('login',{
             <input type="password" class="root-input1" v-model="password">
             </br class="line">
             <button class="root-btn-submit1" @click=submit()>Log in</button>
+            </br class="line">
             <router-link to="/signup">
                 <button class="root-btn-submit1">Sign up</button>
             </router-link>
             <p v-if="somethingwrong">Unable to register. Something went wrong :(</p>
-            <p v-if= "user_not_exists || password_incorrect">Please fix the following errors</p>
+            <p v-if= "user_not_exists || password_incorrect || username_length_incorrect || password_length_incorrect">Please fix the following errors</p>
             <p v-if="user_not_exists">User not found</p>
             <p v-if="password_incorrect">Password Wrong</p>
+            <p v-if="username_length_incorrect">Username length must be > 4</p>
+            <p v-if="password_length_incorrect">Password length must be > 5</p>
         </div>
         </div>
     `,
@@ -224,6 +280,8 @@ const login = Vue.component('login',{
         somethingwrong:false,
         password_incorrect:false,
         user_not_exists:false,
+        username_length_incorrect: false,
+        password_length_incorrect: false,
         username:'',
         password:''
         }
@@ -233,10 +291,30 @@ const login = Vue.component('login',{
     methods:{
         // FUNCTION SUBMIT
         submit:function(){
+            const url_api_login = 'http://'+window.location.host+'/api-login';
+            const url_dashboard = 'http://'+window.location.host+'/dashboard';
+            if (this.username.length<5 || this.password.length<6){
+                if (this.username.length <=4){
+                    console.log("username length incorrect");
+                    this.username_length_incorrect = true;
+                    }
+                else {
+                    this.username_length_incorrect = false;
+                }
+                if (this.password.length <6){
+                    console.log("password length incorrect");
+                    this.password_length_incorrect = true;
+                    }
+                else {
+                    this.passwordl_ength_incorrect = false;
+                    }
+                return;
+                }
             this.loading=true;
-            console.log("DEBUG : root-signup-block submitted")
-            fetch("http://localhost:5000/api-login",{method:'POST',headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({'username':this.username,"password":this.password})})
+            console.log("DEBUG : root-login-block submitted")
+            fetch(url_api_login,{method:'GET',headers:{'Content-Type':'application/json','username':this.username,"password":this.password},
+            //body:JSON.stringify({'username':this.username,"password":this.password})
+        })
             .then((response)=>{
                 if (!response.ok) {
                     console.log("Response not ok");
@@ -254,16 +332,23 @@ const login = Vue.component('login',{
                 }
 
                 if (data['user_exists'] && data['password_correct']){
-                    fetch("http://localhost:5000/",{method:'POST',headers:{'Content-Type':'application/json'},
+                    fetch(url_api_login,{method:'POST',headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({'username':this.username,'password':this.password,'context':'LOGIN'})}).then((response) => {
-                  return response.text();
-              }).then((response)=>{
-                window.location.href = 'http://localhost:5000/dashboard'
+                  //return response.text();
+                  if (!response.ok) {
+                    console.log("Response not ok");
+                }
+                return response.json();
               })
-
-                    //fetch("http://localhost:5000/",{method:'POST',headers:{'Content-Type':'application/json'},
-                    //body:JSON.stringify({'username':this.username,'email':this.email,'password':this.password,'context':'SIGNIN'})})
-                    //console.log("DEBUG : VALID REGISTRATION");
+              .then((data)=>{
+                console.log("Got data",data);
+                if (data['success']){
+                    console.log("DEBUG : logging in")
+                    window.location.href = url_dashboard;
+                }
+                else{
+                    console.log("unable to login")
+                }})
                 }
             })
             .catch((error)=>{

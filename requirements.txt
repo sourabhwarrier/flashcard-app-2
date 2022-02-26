@@ -1,6 +1,6 @@
 flask
 flask-sqlalchemy
-flask-security
+flask-security-too
 matplotlib
 email-validator
 bcrypt
