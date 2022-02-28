@@ -1,6 +1,6 @@
 import email
 from flask_security import SQLAlchemyUserDatastore,UserMixin,RoleMixin
-from sqlalchemy.sql.schema import Column, ForeignKey
+from sqlalchemy.sql.schema import Column
 from db.database import db
 
 role_user_relation = db.Table("roles_users",
@@ -15,7 +15,7 @@ class User(db.Model,UserMixin):
     password = Column(db.String,nullable=False)
     active = Column(db.Boolean)
     confirmed_at = Column(db.DateTime)
-    fs_uniquifier = Column(db.String,nullable=False)
+    fs_uniquifier = Column(db.String,nullable=False,unique=True)
     roles = db.relationship(
         'Role',
         secondary=role_user_relation,
@@ -34,13 +34,27 @@ class Role(db.Model,RoleMixin):
     question = Column(db.String,nullable=False)
     answer = Column(db.String,nullable=False)
     deck_id = Column(db.Integer, db.ForeignKey("decks.deck_id"),nullable=False)
-
+'''
 class Deck(db.Model):
     __tablename__ = "decks"
     deck_id = Column(db.Integer,primary_key=True,autoincrement=True)
     name = Column(db.String,nullable=False)
-    description = Column(db.String,nullable=False)
-    user_id = Column(db.Integer, db.ForeignKey("users.user_id"),nullable=False)
-    private = Column(db.Boolean, nullable=False)'''
+    description = Column(db.String,nullable=True)
+    owner = Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
+    visibility = Column(db.String, nullable=False)
+
+class DeckStat(db.Model):
+    __tablename__ = "deckstats"
+    id = Column(db.Integer,primary_key=True,autoincrement=True)
+    deck_id = Column(db.Integer, db.ForeignKey("decks.deck_id"),nullable=False)
+    user_id = Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
+    last_studied = Column(db.String,nullable=True)
+    average_score = Column(db.String,nullable=True)
+
+class Participation(db.Model):
+    __tablename__ = "participation"
+    id = Column(db.Integer,primary_key=True,autoincrement=True)
+    deck_id = Column(db.Integer, db.ForeignKey("decks.deck_id"),nullable=False)
+    user_id = Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
 
 user_datastore = SQLAlchemyUserDatastore(db,User,Role)
