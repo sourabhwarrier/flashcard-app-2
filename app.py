@@ -1,7 +1,7 @@
 #IMPORTS BEGIN
 from crypt import methods
 from distutils.log import debug
-from controllers.functions_1 import get_user_by_username, sha3512
+from controllers.functions_1 import get_decks_for_dashboard, get_user_by_username, sha3512
 from flask import Flask,session,render_template,request,redirect,g,url_for
 from flask_security import Security,login_required,login_user,logout_user,current_user
 from flask_security.utils import hash_password
@@ -10,7 +10,7 @@ from models.models import User, user_datastore
 import os
 from application.configuration import appConfig
 from db.database import db
-from api.api import UserLoginAPI, UserValAPI, WhoamiAPI
+from api.api import PopulateDashboardAPI, UserLoginAPI, UserValAPI, WhoamiAPI
 
 #IMPORTS END
 
@@ -46,6 +46,7 @@ def root():
 def dashboard():
     if current_user.is_authenticated:
         print("User logged in : ",current_user.is_authenticated, " as : ", current_user.username)
+        print(get_decks_for_dashboard(current_user.id))
         return render_template("dashboard.html")
     else:
         print("User logged in : ",current_user.is_authenticated)
@@ -70,7 +71,8 @@ def before_request():
 # API RESOURCES
 api.add_resource(UserValAPI,"/api-validate")
 api.add_resource(UserLoginAPI,"/api-login")
-api.add_resource(WhoamiAPI,'/api-whoami')
+api.add_resource(WhoamiAPI,"/api-whoami")
+api.add_resource(PopulateDashboardAPI,"/api-populate-dashboard")
 
 if __name__== "__main__":
     app.run(debug=True)

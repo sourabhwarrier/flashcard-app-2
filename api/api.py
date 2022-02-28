@@ -4,7 +4,7 @@ from flask_restful import Resource
 from flask import request,jsonify
 from flask_security import current_user, login_user, logout_user
 from datetime import datetime
-from controllers.functions_1 import email_exists, get_user_by_username, sha3512, username_exists
+from controllers.functions_1 import email_exists, get_decks_for_dashboard, get_user_by_username, sha3512, username_exists
 from models.models import User, user_datastore
 from db.database import db
 
@@ -95,9 +95,31 @@ class WhoamiAPI(Resource):
     def get(self):
         print(current_user.is_authenticated)
         if current_user.is_authenticated:
-            return {"authenticated": True,"me":current_user.username},200
+            return {"authenticated": True,"username":current_user.username,'user_id':current_user.id},200
         else:
-            return {"authenticated": False,"me":None},200
+            return {"authenticated": False,"username":None},200
+    def put(self):
+        pass
+    def post(self):
+        pass
+    def delete(self):
+        pass
+
+
+# WHOAMI API
+class PopulateDashboardAPI(Resource):
+    def get(self):
+        client = request.headers["user_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            decks = get_decks_for_dashboard(current_user.id)['decks']
+            print("deck fetched ", decks)
+            return {'deck_stats':decks},200
+        else:
+            return {"authenticated": False,"username":None},200
     def put(self):
         pass
     def post(self):

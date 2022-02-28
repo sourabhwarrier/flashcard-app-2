@@ -40,39 +40,8 @@
         <br>
         <br>
         <div id="app">
-            <div class="card text-center card-custom">
-                <div class="card-header">
-                    Privacy
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title">Deck Name</h5>
-                    <p class="card-text">This is a short paragraph describing what this deck is about____</p>
-                    <p class="card-text">Recent score {[score]}</p>
-                    <p class="card-text">Average Score {[score]}</p>
-                    <p class="card-text">Difficulty Rating {[score]}</p>
-                    <a href="#" class="btn btn-primary card-button-1">Open deck</a>
-                </div>
-                <div class="card-footer text-muted">
-                    2 days ago
-                </div>
-              </div>
-
-              <div class="card text-center card-custom">
-                <div class="card-header">
-                    Privacy
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title">Deck Name</h5>
-                    <p class="card-text">This is a short paragraph describing what this deck is about____</p>
-                    <p class="card-text">Recent score {[score]}</p>
-                    <p class="card-text">Average Score {[score]}</p>
-                    <p class="card-text">Difficulty Rating {[score]}</p>
-                    <a href="#" class="btn btn-primary card-button-1">Open deck</a>
-                </div>
-                <div class="card-footer text-muted">
-                    2 days ago
-                </div>
-                </div>
+            
+            <deck-stat v-for="deck in deck_stats" :deck="deck"></deck-stat>
               
         <br>
         <br>

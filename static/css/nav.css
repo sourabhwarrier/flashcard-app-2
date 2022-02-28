@@ -26,6 +26,7 @@
 }
 
 .footer-custom{
+    box-shadow: 4px 4px 4px 4px rgba(0,0,0,0.3) !important;
     position:absolute;
     vertical-align: bottom;
     top: auto;
