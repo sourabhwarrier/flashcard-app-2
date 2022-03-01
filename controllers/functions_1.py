@@ -34,24 +34,37 @@ def get_user_by_id(user_id):
     user = db.session.query(User).filter(User.id==user_id).first()
     return user
 
+def get_deck_by_deck_id(deck_id):
+    deck = db.session.query(Deck).filter(Deck.deck_id==deck_id).first()
+    return deck
 def get_deckstat(user_id,deck_id):
     stat = db.session.query(DeckStat).filter(DeckStat.deck_id==deck_id,DeckStat.user_id==user_id).first()
     return stat
 
 
+
+
 def get_decks_for_dashboard(user_id):
-    showable_decks = db.session.query(Participation).filter(Participation.user_id==user_id).all()
-    showable_deck_ids = [x.deck_id for x in showable_decks]
-    decks = db.session.query(Deck).filter((Deck.owner==user_id) | (Deck.visibility=="public")).all()
+    deckstats = db.session.query(DeckStat).filter(DeckStat.user_id==user_id).all()
     deck_dict = {}
     deck_list = []
-    for deck in decks:
-        if deck.deck_id in showable_deck_ids:
-            username = get_user_by_id(deck.owner).username
-            deck_obj = {'deck_id':deck.deck_id,'name':deck.name,'description':deck.description,'owner':username,'visibility':deck.visibility}
-            deck_list.append(deck_obj)
+    for deckstat in deckstats:
+        deck = get_deck_by_deck_id(deckstat.deck_id)
+        owner = get_user_by_id(deck.owner).username
+        visibility = deck.visibility
+        name = deck.name
+        description = deck.description
+        average_score = deckstat.average_score
+        times_reviewed = deckstat.times_reviewed
+        last_reviewed = deckstat.last_reviewed
+        deck_obj = {'owner':owner,
+        'visibility':visibility,
+        'name':name,
+        'description':description,
+        'average_score':average_score,
+        'times_reviewed':times_reviewed,
+        'last_reviewed':last_reviewed}
+        deck_list.append(deck_obj)
     deck_dict['decks'] = deck_list
-    if deck_dict['decks'] == []:
-        return ''
     return deck_dict
         

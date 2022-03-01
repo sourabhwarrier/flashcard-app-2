@@ -1,6 +1,6 @@
 
 
-// START COMPONENT START
+// DECKSTAT COMPONENT START
 const start = Vue.component("deck-stat",{
     // COMPONENT PROPS
     props:["deck"],
@@ -18,10 +18,11 @@ const start = Vue.component("deck-stat",{
         <h5 class="card-title">{[ deck.name ]}</h5>
         <p class="card-text">{[ deck.description ]}</p>
         <p class="card-text">Average Score : {[ deck.average_score ]}</p>
+        <p class="card-text">Times reviewed : {[ deck.times_reviewed ]}</p>
         <a href="#" class="btn btn-primary card-button-1">Open deck</a>
     </div>
     <div class="card-footer text-muted">
-        {[ deck.last_studied ]}
+        Last reviewed : {[ deck.last_reviewed ]}
     </div>
   </div>
     `,
@@ -95,6 +96,7 @@ const app = new Vue({
             })
             .then((data)=>{
                 this.deck_stats = data["deck_stats"]
+                this.loading=false
             })
             .catch((error)=>{
                 console.log(error);
@@ -107,8 +109,6 @@ const app = new Vue({
     // APP.CREATED
     created:function(){
         this.load_user();
-        //this.pupolate_dashboard()
-        this.loading=false
     },
 
 

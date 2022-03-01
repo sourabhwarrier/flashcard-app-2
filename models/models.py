@@ -48,8 +48,16 @@ class DeckStat(db.Model):
     id = Column(db.Integer,primary_key=True,autoincrement=True)
     deck_id = Column(db.Integer, db.ForeignKey("decks.deck_id"),nullable=False)
     user_id = Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
-    last_studied = Column(db.String,nullable=True)
+    last_reviewed = Column(db.String,nullable=True)
+    times_reviewed = Column(db.String,nullable=True)
     average_score = Column(db.String,nullable=True)
+
+class Score(db.Model):
+    __tablename__ = "performances"
+    id = Column(db.Integer,primary_key=True,autoincrement=True)
+    deck_id = Column(db.Integer, db.ForeignKey("decks.deck_id"),nullable=False)
+    user_id = Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
+    score = Column(db.String,nullable=True)
 
 class Participation(db.Model):
     __tablename__ = "participation"

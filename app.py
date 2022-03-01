@@ -55,6 +55,20 @@ def dashboard():
     #    return redirect(url_for("error.html"))
 
 
+# ROUTE FOR decks
+@app.route('/decks',methods=["GET","POST"])
+def decks():
+    if current_user.is_authenticated:
+        print("User logged in : ",current_user.is_authenticated, " as : ", current_user.username)
+        print(get_decks_for_dashboard(current_user.id))
+        return render_template("decks.html")
+    else:
+        print("User logged in : ",current_user.is_authenticated)
+        return redirect(url_for("root"))
+    #except:
+    #    return redirect(url_for("error.html"))
+
+
 # ROUTE FOR ERROR
 @app.route('/error', methods=["GET"])
 def error():
