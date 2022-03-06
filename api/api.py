@@ -115,7 +115,7 @@ class PopulateDashboardAPI(Resource):
         print(str(current_user.id) == str(client))
         print("auth in dpa: ",current_user.is_authenticated)
         if current_user.is_authenticated and str(current_user.id) == str(client):
-            deckstats = get_decks_for_dashboard(current_user.id)['decks']
+            deckstats = get_decks_for_dashboard(current_user.id)
             print("deck fetched ", deckstats)
             return {'deck_stats':deckstats},200
         else:

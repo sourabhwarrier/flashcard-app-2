@@ -1,5 +1,5 @@
 from db.database import db
-from models.models import Deck, Participation, User,DeckStat
+from models.models import Card, Deck, User,DeckStat
 from sqlalchemy import *
 import random
 import hashlib
@@ -46,9 +46,9 @@ def get_deckstat(user_id,deck_id):
 
 def get_decks_for_dashboard(user_id):
     deckstats = db.session.query(DeckStat).filter(DeckStat.user_id==user_id).all()
-    deck_dict = {}
     deck_list = []
     for deckstat in deckstats:
+        number_of_cards = countcards(deckstat.deck_id)
         deck = get_deck_by_deck_id(deckstat.deck_id)
         owner = get_user_by_id(deck.owner).username
         visibility = deck.visibility
@@ -63,8 +63,30 @@ def get_decks_for_dashboard(user_id):
         'description':description,
         'average_score':average_score,
         'times_reviewed':times_reviewed,
-        'last_reviewed':last_reviewed}
+        'last_reviewed':last_reviewed,
+        'number_of_cards':number_of_cards}
         deck_list.append(deck_obj)
-    deck_dict['decks'] = deck_list
-    return deck_dict
+    return deck_list
+
+
+def countcards(deck_id):
+    cards = db.session.query(Card).filter(Card.deck_id==deck_id).all()
+    return len(cards)
         
+
+def get_decks_user(user_id):
+    decks = db.session.query(Deck).filter(Deck.owner==user_id).all()
+    deck_list = []
+    for deck in decks:
+        number_of_cards = countcards(deck.deck_id)
+        owner = get_user_by_id(deck.owner).username
+        visibility = deck.visibility
+        name = deck.name
+        description = deck.description
+        deck_obj = {'owner':owner,
+        'visibility':visibility,
+        'name':name,
+        'description':description,
+        'number_of_cards':number_of_cards}
+        deck_list.append(deck_obj)
+    return decks

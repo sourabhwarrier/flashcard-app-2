@@ -19,7 +19,18 @@
     background-color: #5596e6 !important;
 }
 
-.decks-component{
+.visibility-label{
+    float: none !important;
+    display: inline !important;
+}
+.custom-switch-form{
+    margin-left: -40px;
+    float: right !important;
+    display: inline-block !important;
+}
+
+
+.decks-view{
     position: relative;
     min-height: 100vh;
     background-color: aqua;

@@ -1,7 +1,9 @@
+// DEBUG
+console.log("DEBUG : loaded dashboard.js");
 
 
 // DECKSTAT COMPONENT START
-const start = Vue.component("deck-stat",{
+const deck = Vue.component("deck-stat",{
     // COMPONENT PROPS
     props:["deck"],
 
@@ -101,11 +103,8 @@ const app = new Vue({
             .catch((error)=>{
                 console.log(error);
             });
-        
         },
-
     }, 
-
     // APP.CREATED
     created:function(){
         this.load_user();
