@@ -225,6 +225,8 @@ const signup = Vue.component('signup',{
                 console.log("Got data",data);
                 if (data['success']){
                     console.log("DEBUG : logging in")
+                    console.log(data['auth-token'])
+                    this.setCookie('auth-token',data['auth-token'],6)
                     window.location.href = url_dashboard;
                 }
                 else{
@@ -236,7 +238,13 @@ const signup = Vue.component('signup',{
                 console.log("Caught error",error)
             });
             this.loading=false;
-        }
+        },
+        setCookie: function(cname, cvalue, exhours) {
+            const d = new Date();
+            d.setTime(d.getTime() + (exhours*60*60*1000));
+            let expires = "expires="+ d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+          },
     },
 })
 // SIGNUP COMPONENT END
@@ -345,6 +353,8 @@ const login = Vue.component('login',{
                 console.log("Got data",data);
                 if (data['success']){
                     console.log("DEBUG : logging in")
+                    console.log(data['auth-token'])
+                    this.setCookie('auth-token',data['auth-token'],6)
                     window.location.href = url_dashboard;
                 }
                 else{
@@ -356,7 +366,27 @@ const login = Vue.component('login',{
                 console.log("Caught error",error)
             });
             this.loading=false;
-        }
+        },
+        setCookie: function(cname, cvalue, exhours) {
+            const d = new Date();
+            d.setTime(d.getTime() + (exhours*60*60*1000));
+            let expires = "expires="+ d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+          },
+        getCookie:function(cname) {
+            let name = cname + "=";
+            let ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+              let c = ca[i];
+              while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+              }
+              if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+              }
+            }
+            return null;
+          }
     },
 })
 // LOGIN COMPONENT END

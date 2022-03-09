@@ -61,8 +61,8 @@ const app = new Vue({
 
     // APP METHODS
     methods :{
-        load_user:function (){
-            fetch(this.url_api_whoami,{method:'GET',headers:{'Content-Type':'application/json'},})
+        load_user:function (auth_token){
+            fetch(this.url_api_whoami,{method:'GET',headers:{'Content-Type':'application/json','auth-token':auth_token},})
             .then((response)=>{
                 if (!response.ok){
                     console.log("Response not ok");
@@ -73,7 +73,7 @@ const app = new Vue({
                 if (data["authenticated"]) {
                     this.current_user_name = data["username"];
                     this.current_user_id = data["user_id"]
-                    this.pupolate_dashboard()
+                    this.pupolate_dashboard(auth_token)
                     this.console.log(data);
                 }
                 else {
@@ -84,12 +84,11 @@ const app = new Vue({
             })
             .catch((error)=>{
                 console.log(error);
-            });
-            console.log(this.current_user_name)   
+            });  
         },
 
-        pupolate_dashboard:function(){
-            fetch(this.url_api_populate_dashboard,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user_id},})
+        pupolate_dashboard:function(auth_token){
+            fetch(this.url_api_populate_dashboard,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user_id,'auth-token':auth_token},})
             .then((response)=>{
                 if (!response.ok){
                     console.log("Response not ok");
@@ -104,10 +103,32 @@ const app = new Vue({
                 console.log(error);
             });
         },
+
+        getCookie:function(cname) {
+            let name = cname + "=";
+            let ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+              let c = ca[i];
+              while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+              }
+              if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+              }
+            }
+            return null;
+          },
     }, 
     // APP.CREATED
     created:function(){
-        this.load_user();
+        let auth_token = this.getCookie('auth-token')
+        if (auth_token != null){
+            console.log('auth-token : '+auth_token)
+            this.load_user(auth_token)
+        }
+        else{
+            window.location.href = 'http://'+window.location.host + '/logout';
+        }
     },
 
 

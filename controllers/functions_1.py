@@ -53,6 +53,7 @@ def get_decks_for_dashboard(user_id):
         owner = get_user_by_id(deck.owner).username
         visibility = deck.visibility
         name = deck.name
+        deck_id=deck.deck_id
         description = deck.description
         average_score = deckstat.average_score
         times_reviewed = deckstat.times_reviewed
@@ -64,6 +65,7 @@ def get_decks_for_dashboard(user_id):
         'average_score':average_score,
         'times_reviewed':times_reviewed,
         'last_reviewed':last_reviewed,
+        'deck_id':deck_id,
         'number_of_cards':number_of_cards}
         deck_list.append(deck_obj)
     return deck_list
@@ -74,10 +76,16 @@ def countcards(deck_id):
     return len(cards)
         
 
-def get_decks_user(user_id):
-    decks = db.session.query(Deck).filter(Deck.owner==user_id).all()
+def get_decks_for_user(user_id):
+    decks = db.session.query(Deck).filter(or_(Deck.owner==user_id,Deck.visibility=='Public')).all()
     deck_list = []
     for deck in decks:
+        deckstat = db.session.query(DeckStat).filter(DeckStat.deck_id==deck.deck_id).first()
+        if deckstat==None:
+            last_reviewed='Never'
+        else:
+            last_reviewed=deckstat.last_reviewed
+        deck_id = deck.deck_id
         number_of_cards = countcards(deck.deck_id)
         owner = get_user_by_id(deck.owner).username
         visibility = deck.visibility
@@ -87,6 +95,8 @@ def get_decks_user(user_id):
         'visibility':visibility,
         'name':name,
         'description':description,
-        'number_of_cards':number_of_cards}
+        'number_of_cards':number_of_cards,
+        'deck_id':deck_id,
+        'last_reviewed':last_reviewed}
         deck_list.append(deck_obj)
-    return decks
+    return deck_list

@@ -10,7 +10,7 @@ from models.models import User, user_datastore
 import os
 from application.configuration import appConfig
 from db.database import db
-from api.api import PopulateDashboardAPI, UserLoginAPI, UserValAPI, WhoamiAPI
+from api.api import DecksAPI, PopulateDashboardAPI, UserLoginAPI, UserValAPI, WhoamiAPI
 
 #IMPORTS END
 
@@ -87,6 +87,7 @@ api.add_resource(UserValAPI,"/api-validate")
 api.add_resource(UserLoginAPI,"/api-login")
 api.add_resource(WhoamiAPI,"/api-whoami")
 api.add_resource(PopulateDashboardAPI,"/api-populate-dashboard")
+api.add_resource(DecksAPI,"/api-load-all-decks")
 
 if __name__== "__main__":
     app.run(debug=True)
