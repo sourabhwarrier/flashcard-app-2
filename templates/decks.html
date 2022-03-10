@@ -40,8 +40,11 @@
         <br>
         <br>
         <div id="app">
-         
-         <router-view></router-view>
+          <div class="app-contents">
+            <p class="name-tag">Logged in as <strong>{[ current_user.username ]}</strong></p>
+          </div>
+          <br>
+          <router-view></router-view>
         <br>
         <br>
         <br>

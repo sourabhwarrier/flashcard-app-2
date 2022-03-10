@@ -5,7 +5,7 @@ from flask import request,jsonify
 from flask_security import current_user, login_user, logout_user
 from datetime import datetime
 from controllers.functions_1 import email_exists, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, sha3512, username_exists
-from models.models import User, user_datastore
+from models.models import Deck, User, user_datastore
 from db.database import db
 
 # USER VALIDATION API
@@ -134,7 +134,7 @@ class PopulateDashboardAPI(Resource):
         pass
 
 
-# DASHBOARD API
+# DEKCS API
 class DecksAPI(Resource):
     def get(self):
         client = request.headers["user_id"]
@@ -155,5 +155,36 @@ class DecksAPI(Resource):
         pass
     def post(self):
         pass
+    def delete(self):
+        pass
+
+
+# DECK VISIBILITY API
+class DeckVisibilityAPI(Resource):
+    def get(self):
+        pass
+    def put(self):
+        pass
+    def post(self):
+        client = request.get_json()["user_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                deck = db.session.query(Deck).filter(Deck.deck_id==request.get_json()['deck_id']).first()
+                if deck != None and deck.owner == request.get_json()['user_id']:
+                    deck.visibility = request.get_json()['new_visibility']
+                    db.session.query(Deck).filter(Deck.deck_id==request.get_json()['deck_id']).update({'visibility':deck.visibility})
+                    db.session.commit()
+                    print('changed visibility for deck : {} from {} to {}'.format(request.get_json()['deck_id'],request.get_json()['current_visibility'],deck.visibility))
+                    return {'authenticated':True},200
+                else:
+                    return {'authenticated':False},304
+            else:
+                {"authenticated": False,"username":current_user.username},200
+        else:
+            return {"authenticated": False,"username":None},200
     def delete(self):
         pass
