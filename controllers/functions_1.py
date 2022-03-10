@@ -100,3 +100,8 @@ def get_decks_for_user(user_id):
         'last_reviewed':last_reviewed}
         deck_list.append(deck_obj)
     return deck_list
+
+
+def add_deck(deck):
+    db.session.add(deck)
+    db.session.commit()

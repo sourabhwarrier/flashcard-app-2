@@ -24,6 +24,10 @@
     background-color: #5596e6 !important;
 }
 
+.btn-size-1 {
+    width: 120px;
+}
+
 .visibility-label{
     float: none !important;
     display: inline !important;

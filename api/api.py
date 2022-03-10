@@ -1,10 +1,11 @@
 from ast import Pass
 from logging import error
+from pydoc import describe
 from flask_restful import Resource
 from flask import request,jsonify
 from flask_security import current_user, login_user, logout_user
 from datetime import datetime
-from controllers.functions_1 import email_exists, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, sha3512, username_exists
+from controllers.functions_1 import add_deck, email_exists, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, sha3512, username_exists
 from models.models import Deck, User, user_datastore
 from db.database import db
 
@@ -188,3 +189,37 @@ class DeckVisibilityAPI(Resource):
             return {"authenticated": False,"username":None},200
     def delete(self):
         pass
+
+
+
+# DECK API CORE
+class DeckAPI(Resource):
+    def get(self):
+        pass
+    def put(self):
+        pass
+    def post(self):
+        client = request.get_json()["user_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                deck_name = request.get_json()['deck_name']
+                deck_description = request.get_json()['deck_description']
+                visibility = request.get_json()['visibility']
+                owner = client
+                new_deck = Deck(name=deck_name,description=deck_description,owner=owner,visibility=visibility)
+                try:
+                    add_deck(new_deck)
+                    return {'authenticated':True,'success':True},200
+                except:
+                    return {'authenticated':True,'success':False}
+            else:
+                {"authenticated": False,"username":current_user.username},200
+        else:
+            return {"authenticated": False,"username":None},200
+    def delete(self):
+        pass
+

@@ -117,10 +117,10 @@ const decksview = Vue.component('decksview',{
         </div>
         <div v-else>
             <router-link to="/adddeck">
-                <button class="btn btn-success">Add Deck</button>
+                <button class="btn btn-success btn-size-1">Add Deck</button>
             </router-link>
             <router-link to="/deletedeck">
-                <button class="btn btn-warning">Delete Deck</button>
+                <button class="btn btn-warning btn-size-1">Delete Deck</button>
             </router-link>
             <br>
             <deck v-for="(deck,i) in decks" :index="i" :deck="deck" :current_user="current_user"></deck>
@@ -232,10 +232,10 @@ const adddeck = Vue.component('adddeck',{
         </div>
         <div v-else>
             <router-link to="/">
-                <button class="btn btn-info">View Decks</button>
+                <button class="btn btn-info btn-size-1">View Decks</button>
             </router-link>
             <router-link to="/deletedeck">
-                <button class="btn btn-warning">Delete Deck</button>
+                <button class="btn btn-warning btn-size-1">Delete Deck</button>
             </router-link>
             <br>
             <div class="adddeck-block">
@@ -253,7 +253,7 @@ const adddeck = Vue.component('adddeck',{
                   <input class="form-check-input custom-switch" type="checkbox" id="flexSwitchCheckDefault" @click=privacy_toggle()>
               </div>
               </div>
-              <a class="btn btn-primary card-button-2" style="float: right;">Add</a>
+              <a class="btn btn-primary card-button-2" style="float: right;" @click="submit()">Add</a>
               <a class="btn btn-primary card-button-2" style="float: right; margin-right: 10px;">Import</a>
             </div>  
         </div>    
@@ -267,7 +267,7 @@ const adddeck = Vue.component('adddeck',{
         current_user:{'username':undefined,'user_id':undefined},
         url_api_whoami:'http://'+window.location.host+'/api-whoami',
         url_dashboard:'http://'+window.location.host+'/dashboard',
-        url_api_manage_deck:'http://'+window.location.host+'/api-manage-deck',
+        url_api_manage_deck:'http://'+window.location.host+'/api-manage-decks',
         deck_name:undefined,
         deck_description:undefined,
         visibility:'Private',
@@ -294,7 +294,7 @@ const adddeck = Vue.component('adddeck',{
                 else {
                     this.current_user['username'] = undefined;
                     this.current_user['user_id'] = undefined;
-                    window.location.href = 'http://'+window.location.host + '/';
+                    window.location.href = this.url_dashboard
                 }
             })
             .catch((error)=>{
@@ -302,7 +302,7 @@ const adddeck = Vue.component('adddeck',{
             });   
         },
 
-        privacy_toggle:function (){
+        privacy_toggle:function() { 
             if (this.visibility == 'Private'){
                 toggle = document.getElementsByClassName('custom-switch')
             }
@@ -313,6 +313,34 @@ const adddeck = Vue.component('adddeck',{
             this.visibility = (toggle[0].checked) ? 'Public' : 'Private';
             console.log(toggle[0].checked)
             console.log(this.visibility);
+        },
+
+        submit:function(){
+            let auth_token = this.getCookie('auth-token')
+            fetch(this.url_api_manage_deck,{method:'POST',headers:{'Content-Type':'application/json','auth-token':auth_token},
+            body:JSON.stringify({'visibility':this.visibility,'deck_name':this.deck_name,'deck_description':this.deck_description,'user_id':this.current_user['user_id']})})
+            .then((response)=>{
+                if (!response.ok){
+                    console.log("Response not ok");
+                }
+            return response.json();
+                })
+            .then((data)=>{
+                if (data["authenticated"]) {
+                    if (data['success']){
+                        alert('Deck added!')
+                    }
+                    else{
+                        alert('Deck could not be added!')
+                    }
+                }
+                else {
+                    this.deck.visibility = current_visibility;
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            });
         },
 
         getCookie:function(cname) {
