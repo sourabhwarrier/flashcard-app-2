@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Dashboard</title>
+        <title>Decks</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
         <script type="text/javascript" src="https://unpkg.com/vue-router@2.0.0/dist/vue-router.js"></script>
@@ -9,7 +9,7 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
         <link href="{{ url_for('static', filename='css/base.css') }}" rel="stylesheet">
-        <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/decks.css') }}" rel="stylesheet">
     </head>
     <body>
         <header>
@@ -22,10 +22,10 @@
                   <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav">
                       <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                        <a class="nav-link" aria-current="page" href="/dashboard">Home</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link" href="/decks">Decks</a>
+                        <a class="nav-link active" href="#">Decks</a>
                       </li>
                       <li class="nav-item">
                         <a class="nav-link" href="#">Quiz</a>
@@ -40,10 +40,11 @@
         <br>
         <br>
         <div id="app">
-          <div v-if="loading">
-            <img stryle="" src="static/img/loader3.gif" alt="loading" width="50" height="50">
-        </div>
-            <deck-stat v-else v-for="deck in deck_stats" :deck="deck"></deck-stat>
+          <div class="app-contents">
+            <p class="name-tag">Logged in as <strong>{[ current_user.username ]}</strong></p>
+          </div>
+          <br>
+          <router-view></router-view>
         <br>
         <br>
         <br>
@@ -58,5 +59,5 @@
                 </div>
         </div>
     </body>
-    <script type="text/javascript" src="{{ url_for('static', filename='javascript/dashboard.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='javascript/decks.js') }}"></script>
 </html>

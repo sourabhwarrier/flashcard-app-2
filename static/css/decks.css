@@ -1,0 +1,90 @@
+#app{
+    position: relative;
+    min-height: 100vh;
+    /*background-color: aqua;*/
+    text-align: center !important;
+    justify-content: center !important;
+    margin-right: 0;
+}
+.card-custom{
+    margin-top: 20px !important;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.1) !important;
+    margin: auto;
+    justify-content: center !important;
+    width: 500px !important;
+}
+
+.card-button-1{
+    width: 120px;
+    background-color: #5596e6 !important;
+}
+
+.card-button-2{
+    width: 80px;
+    background-color: #5596e6 !important;
+}
+
+.btn-size-1 {
+    width: 120px;
+}
+
+.visibility-label{
+    float: none !important;
+    display: inline !important;
+}
+.custom-switch-form{
+    margin-left: -40px;
+    float: right !important;
+    display: inline-block !important;
+}
+
+
+.decks-view{
+    position: relative;
+    min-height: 100vh;
+    
+    text-align: center !important;
+    justify-content: center !important;
+    margin-right: 0;
+}
+
+.adddeck-view{
+    position: relative;
+    min-height: 100vh;
+    background-color: aqua;
+    text-align: center !important;
+    justify-content: center !important;
+    margin-right: 0;
+}
+
+.adddeck-block{
+    position: absolute;
+    margin: 0;
+    top: 50%;
+    left: 50%;
+    width: 265px;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -70%);
+}
+
+
+.app-contents{
+    position: absolute;
+}
+
+.name-tag{
+   float: left !important;
+   margin-left: 13px;
+    
+}
+
+.deck-form-label{
+    float: left;
+}
+
+.deck-form-input{
+    margin: auto;
+    height: 45px !important;
+    width: 265px !important;
+}
+

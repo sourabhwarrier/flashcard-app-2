@@ -43,13 +43,29 @@ class Deck(db.Model):
     owner = Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
     visibility = Column(db.String, nullable=False)
 
+class Card(db.Model):
+    __tablename__ = "cards"
+    card_id = Column(db.Integer,primary_key=True,autoincrement=True)
+    deck_id = Column(db.Integer, db.ForeignKey("decks.deck_id"),nullable=False)
+    question = Column(db.String,nullable=False)
+    hint = Column(db.String,nullable=True)
+    answer = Column(db.String, nullable=False)
+
 class DeckStat(db.Model):
     __tablename__ = "deckstats"
     id = Column(db.Integer,primary_key=True,autoincrement=True)
     deck_id = Column(db.Integer, db.ForeignKey("decks.deck_id"),nullable=False)
     user_id = Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
-    last_studied = Column(db.String,nullable=True)
+    last_reviewed = Column(db.String,nullable=True)
+    times_reviewed = Column(db.String,nullable=True)
     average_score = Column(db.String,nullable=True)
+
+class Score(db.Model):
+    __tablename__ = "performances"
+    id = Column(db.Integer,primary_key=True,autoincrement=True)
+    deck_id = Column(db.Integer, db.ForeignKey("decks.deck_id"),nullable=False)
+    user_id = Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
+    score = Column(db.String,nullable=True)
 
 class Participation(db.Model):
     __tablename__ = "participation"

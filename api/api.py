@@ -1,11 +1,12 @@
 from ast import Pass
 from logging import error
+from pydoc import describe
 from flask_restful import Resource
 from flask import request,jsonify
 from flask_security import current_user, login_user, logout_user
 from datetime import datetime
-from controllers.functions_1 import email_exists, get_decks_for_dashboard, get_user_by_username, sha3512, username_exists
-from models.models import User, user_datastore
+from controllers.functions_1 import add_deck, delete_deck, email_exists, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, sha3512, username_exists
+from models.models import Deck, User, user_datastore
 from db.database import db
 
 # USER VALIDATION API
@@ -31,7 +32,7 @@ class UserValAPI(Resource):
             user = get_user_by_username(request.get_json()["username"])
             print(user)
             login_user(user)
-            return {'success':True}
+            return {'success':True,'auth-token':sha3512(user.fs_uniquifier)}
         else:
             return {'success':False}
         #except:
@@ -81,7 +82,7 @@ class UserLoginAPI(Resource):
             user = get_user_by_username(request.get_json()["username"])
             print(user)
             login_user(user)
-            return {'success':True}
+            return {'success':True,'auth-token':sha3512(user.fs_uniquifier)}
         else:
             return {'success':False}
         #except:
@@ -95,7 +96,10 @@ class WhoamiAPI(Resource):
     def get(self):
         print(current_user.is_authenticated)
         if current_user.is_authenticated:
-            return {"authenticated": True,"username":current_user.username,'user_id':current_user.id},200
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                return {"authenticated": True,"username":current_user.username,'user_id':current_user.id},200
+            else:
+                return {"authenticated": False,"username":current_user.username},200
         else:
             return {"authenticated": False,"username":None},200
     def put(self):
@@ -106,7 +110,7 @@ class WhoamiAPI(Resource):
         pass
 
 
-# WHOAMI API
+# DASHBOARD API
 class PopulateDashboardAPI(Resource):
     def get(self):
         client = request.headers["user_id"]
@@ -115,9 +119,12 @@ class PopulateDashboardAPI(Resource):
         print(str(current_user.id) == str(client))
         print("auth in dpa: ",current_user.is_authenticated)
         if current_user.is_authenticated and str(current_user.id) == str(client):
-            decks = get_decks_for_dashboard(current_user.id)['decks']
-            print("deck fetched ", decks)
-            return {'deck_stats':decks},200
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                deckstats = get_decks_for_dashboard(current_user.id)
+                print("deck fetched ", deckstats)
+                return {'authenticated':True,'deck_stats':deckstats},200
+            else:
+                return {"authenticated": False,"username":current_user.username},200
         else:
             return {"authenticated": False,"username":None},200
     def put(self):
@@ -126,3 +133,111 @@ class PopulateDashboardAPI(Resource):
         pass
     def delete(self):
         pass
+
+
+# DEKCS API
+class DecksAPI(Resource):
+    def get(self):
+        client = request.headers["user_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                decks = get_decks_for_user(current_user.id)
+                print("deck fetched ", decks)
+                return {'authenticated':True,'decks':decks},200
+            else:
+                {"authenticated": False,"username":current_user.username},200
+        else:
+            return {"authenticated": False,"username":None},200
+    def put(self):
+        pass
+    def post(self):
+        pass
+    def delete(self):
+        pass
+
+
+# DECK VISIBILITY API
+class DeckVisibilityAPI(Resource):
+    def get(self):
+        pass
+    def put(self):
+        pass
+    def post(self):
+        client = request.get_json()["user_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                deck = db.session.query(Deck).filter(Deck.deck_id==request.get_json()['deck_id']).first()
+                if deck != None and deck.owner == request.get_json()['user_id']:
+                    deck.visibility = request.get_json()['new_visibility']
+                    db.session.query(Deck).filter(Deck.deck_id==request.get_json()['deck_id']).update({'visibility':deck.visibility})
+                    db.session.commit()
+                    print('changed visibility for deck : {} from {} to {}'.format(request.get_json()['deck_id'],request.get_json()['current_visibility'],deck.visibility))
+                    return {'authenticated':True},200
+                else:
+                    return {'authenticated':False},304
+            else:
+                {"authenticated": False,"username":current_user.username},200
+        else:
+            return {"authenticated": False,"username":None},200
+    def delete(self):
+        pass
+
+
+
+# DECK API CORE
+class DeckAPI(Resource):
+    def get(self):
+        pass
+    def put(self):
+        pass
+    def post(self):
+        client = request.get_json()["user_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                deck_name = request.get_json()['deck_name']
+                deck_description = request.get_json()['deck_description']
+                visibility = request.get_json()['visibility']
+                owner = client
+                new_deck = Deck(name=deck_name,description=deck_description,owner=owner,visibility=visibility)
+                try:
+                    add_deck(new_deck)
+                    return {'authenticated':True,'success':True},200
+                except:
+                    return {'authenticated':True,'success':False}
+            else:
+                {"authenticated": False,"username":current_user.username},200
+        else:
+            return {"authenticated": False,"username":None},200
+    def delete(self):
+        client = request.get_json()["user_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                deck_ids = request.get_json()['deck_ids']
+                try:
+                    print('to delete : ',deck_ids)
+                    for deck_id in deck_ids:
+                        delete_deck(int(deck_id))
+                    return {'authenticated':True,'success':True},200
+                except:
+                    return {'authenticated':True,'success':False}
+            else:
+                {"authenticated": False,"username":current_user.username},200
+        else:
+            return {"authenticated": False,"username":None},200
+

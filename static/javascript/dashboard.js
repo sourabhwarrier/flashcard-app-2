@@ -1,7 +1,9 @@
+// DEBUG
+console.log("DEBUG : loaded dashboard.js");
 
 
-// START COMPONENT START
-const start = Vue.component("deck-stat",{
+// DECKSTAT COMPONENT START
+const deck = Vue.component("deck-stat",{
     // COMPONENT PROPS
     props:["deck"],
 
@@ -18,10 +20,11 @@ const start = Vue.component("deck-stat",{
         <h5 class="card-title">{[ deck.name ]}</h5>
         <p class="card-text">{[ deck.description ]}</p>
         <p class="card-text">Average Score : {[ deck.average_score ]}</p>
+        <p class="card-text">Times reviewed : {[ deck.times_reviewed ]}</p>
         <a href="#" class="btn btn-primary card-button-1">Open deck</a>
     </div>
     <div class="card-footer text-muted">
-        {[ deck.last_studied ]}
+        Last reviewed : {[ deck.last_reviewed ]}
     </div>
   </div>
     `,
@@ -58,8 +61,8 @@ const app = new Vue({
 
     // APP METHODS
     methods :{
-        load_user:function (){
-            fetch(this.url_api_whoami,{method:'GET',headers:{'Content-Type':'application/json'},})
+        load_user:function (auth_token){
+            fetch(this.url_api_whoami,{method:'GET',headers:{'Content-Type':'application/json','auth-token':auth_token},})
             .then((response)=>{
                 if (!response.ok){
                     console.log("Response not ok");
@@ -70,7 +73,7 @@ const app = new Vue({
                 if (data["authenticated"]) {
                     this.current_user_name = data["username"];
                     this.current_user_id = data["user_id"]
-                    this.pupolate_dashboard()
+                    this.pupolate_dashboard(auth_token)
                     this.console.log(data);
                 }
                 else {
@@ -81,12 +84,11 @@ const app = new Vue({
             })
             .catch((error)=>{
                 console.log(error);
-            });
-            console.log(this.current_user_name)   
+            });  
         },
 
-        pupolate_dashboard:function(){
-            fetch(this.url_api_populate_dashboard,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user_id},})
+        pupolate_dashboard:function(auth_token){
+            fetch(this.url_api_populate_dashboard,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user_id,'auth-token':auth_token},})
             .then((response)=>{
                 if (!response.ok){
                     console.log("Response not ok");
@@ -95,20 +97,38 @@ const app = new Vue({
             })
             .then((data)=>{
                 this.deck_stats = data["deck_stats"]
+                this.loading=false
             })
             .catch((error)=>{
                 console.log(error);
             });
-        
         },
 
+        getCookie:function(cname) {
+            let name = cname + "=";
+            let ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+              let c = ca[i];
+              while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+              }
+              if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+              }
+            }
+            return null;
+          },
     }, 
-
     // APP.CREATED
     created:function(){
-        this.load_user();
-        //this.pupolate_dashboard()
-        this.loading=false
+        let auth_token = this.getCookie('auth-token')
+        if (auth_token != null){
+            console.log('auth-token : '+auth_token)
+            this.load_user(auth_token)
+        }
+        else{
+            window.location.href = 'http://'+window.location.host + '/logout';
+        }
     },
 
 

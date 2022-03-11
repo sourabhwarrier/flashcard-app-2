@@ -10,7 +10,7 @@ from models.models import User, user_datastore
 import os
 from application.configuration import appConfig
 from db.database import db
-from api.api import PopulateDashboardAPI, UserLoginAPI, UserValAPI, WhoamiAPI
+from api.api import DeckAPI, DeckVisibilityAPI, DecksAPI, PopulateDashboardAPI, UserLoginAPI, UserValAPI, WhoamiAPI
 
 #IMPORTS END
 
@@ -55,6 +55,20 @@ def dashboard():
     #    return redirect(url_for("error.html"))
 
 
+# ROUTE FOR decks
+@app.route('/decks',methods=["GET","POST"])
+def decks():
+    if current_user.is_authenticated:
+        print("User logged in : ",current_user.is_authenticated, " as : ", current_user.username)
+        print(get_decks_for_dashboard(current_user.id))
+        return render_template("decks.html")
+    else:
+        print("User logged in : ",current_user.is_authenticated)
+        return redirect(url_for("root"))
+    #except:
+    #    return redirect(url_for("error.html"))
+
+
 # ROUTE FOR ERROR
 @app.route('/error', methods=["GET"])
 def error():
@@ -73,6 +87,10 @@ api.add_resource(UserValAPI,"/api-validate")
 api.add_resource(UserLoginAPI,"/api-login")
 api.add_resource(WhoamiAPI,"/api-whoami")
 api.add_resource(PopulateDashboardAPI,"/api-populate-dashboard")
+api.add_resource(DecksAPI,"/api-load-all-decks")
+api.add_resource(DeckVisibilityAPI,"/api-update-deck-visibility")
+api.add_resource(DeckAPI,"/api-manage-decks")
+
 
 if __name__== "__main__":
     app.run(debug=True)

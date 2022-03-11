@@ -1,0 +1,20 @@
+#app{
+    position: relative;
+    min-height: 100vh;
+    /*background-color: aqua;*/
+    text-align: center !important;
+    justify-content: center !important;
+    margin-right: 0;
+}
+.card-custom{
+    margin-top: 20px !important;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.1) !important;
+    margin: auto;
+    justify-content: center !important;
+    width: 500px !important;
+}
+
+.card-button-1{
+    
+    background-color: #5596e6 !important;
+}
