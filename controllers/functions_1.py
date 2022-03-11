@@ -102,6 +102,20 @@ def get_decks_for_user(user_id):
     return deck_list
 
 
+def get_cards_by_deck(deck_id):
+    cards = db.session.query(Card).filter(Card.deck_id==deck_id).all()
+    return cards
+
+def delete_card(card_id):
+    db.session.query(Card).filter(Card.card_id==card_id).delete()
+    db.session.commit()
+
 def add_deck(deck):
     db.session.add(deck)
+    db.session.commit()
+
+def delete_deck(deck_id):
+    for card in get_cards_by_deck(deck_id):
+        delete_card(card.card_id)
+    db.session.query(Deck).filter(Deck.deck_id==deck_id).delete()
     db.session.commit()

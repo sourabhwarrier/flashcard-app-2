@@ -5,7 +5,7 @@ from flask_restful import Resource
 from flask import request,jsonify
 from flask_security import current_user, login_user, logout_user
 from datetime import datetime
-from controllers.functions_1 import add_deck, email_exists, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, sha3512, username_exists
+from controllers.functions_1 import add_deck, delete_deck, email_exists, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, sha3512, username_exists
 from models.models import Deck, User, user_datastore
 from db.database import db
 
@@ -221,5 +221,23 @@ class DeckAPI(Resource):
         else:
             return {"authenticated": False,"username":None},200
     def delete(self):
-        pass
+        client = request.get_json()["user_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                deck_ids = request.get_json()['deck_ids']
+                try:
+                    print('to delete : ',deck_ids)
+                    for deck_id in deck_ids:
+                        delete_deck(int(deck_id))
+                    return {'authenticated':True,'success':True},200
+                except:
+                    return {'authenticated':True,'success':False}
+            else:
+                {"authenticated": False,"username":current_user.username},200
+        else:
+            return {"authenticated": False,"username":None},200
 

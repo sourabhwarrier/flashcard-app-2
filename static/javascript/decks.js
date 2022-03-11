@@ -1,7 +1,14 @@
 // DEBUG
 console.log("DEBUG : loaded decks.js");
 
-// DECKSTAT COMPONENT START
+// GLOBAL STORE
+const store = new Vuex.Store({
+    state:{
+        delete_deck_ids:[],
+    }
+});
+
+// DECK COMPONENT START
 const deck = Vue.component("deck",{
     // COMPONENT PROPS
     props:["deck","current_user", "index"],
@@ -103,6 +110,78 @@ const deck = Vue.component("deck",{
 })
 
 
+// DECKSELECTOR COMPONENT START
+const deckselector = Vue.component("deckselector",{
+    // COMPONENT PROPS
+    props:["deck","current_user", "index"],
+
+    // COMPONENT DATA
+    data:function(){
+        return{
+            current_visibility:this.deck.visibility,
+            deck_id:this.deck.deck_id,
+            user_id:this.current_user.user_id,
+            url_api_update_visibility:'http://'+window.location.host+'/api-update-deck-visibility',
+        }
+    },
+    // COMPONENT DELIMITER
+    delimiters:["{[","]}"],
+    
+    // COMPONENT TEMPLATE
+    template:`
+    <div class="card text-center card-custom">
+        <div class="card-header">
+            <div class="form-check custom-check-form">
+            <input class="form-check-input custom-check" type="checkbox" :value=this.deck_id id="flexCheckDefault" @click="interacted()">
+            </div>
+        </div>
+        <div class="card-body">
+        <h5 class="card-title">{[ deck.name ]}</h5>
+        <p class="card-text">{[ deck.description ]}</p>
+        <p>{[ deck.number_of_cards ]} cards</p>
+        <p>Created by {[ deck.owner ]}</p>
+        <a href="#" class="btn btn-primary card-button-1">Open deck</a>
+        </div>
+        <div class="card-footer text-muted">
+            Last reviewed : {[ deck.last_reviewed ]}
+        </div>
+    </div>
+    `,
+
+    //COMPONENT METHODS
+    methods:{
+        interacted:function (){
+            check = document.getElementsByClassName('custom-check')[this.index];
+            if (check.checked){
+                console.log('checked for deck_id : '+check.value)
+                store.state.delete_deck_ids.push(check.value)
+            }
+            else{
+                console.log('unchecked for deck_id : '+check.value)
+            }
+
+
+        },
+
+        getCookie:function(cname) {
+            let name = cname + "=";
+            let ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+              let c = ca[i];
+              while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+              }
+              if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+              }
+            }
+            return null;
+          },
+    }
+})
+
+
+
 // DECKSVIEW COMPONENT START
 const decksview = Vue.component('decksview',{
 
@@ -119,7 +198,7 @@ const decksview = Vue.component('decksview',{
             <router-link to="/adddeck">
                 <button class="btn btn-success btn-size-1">Add Deck</button>
             </router-link>
-            <router-link to="/deletedeck">
+            <router-link to="/deletedecks">
                 <button class="btn btn-warning btn-size-1">Delete Deck</button>
             </router-link>
             <br>
@@ -234,7 +313,7 @@ const adddeck = Vue.component('adddeck',{
             <router-link to="/">
                 <button class="btn btn-info btn-size-1">View Decks</button>
             </router-link>
-            <router-link to="/deletedeck">
+            <router-link to="/deletedecks">
                 <button class="btn btn-warning btn-size-1">Delete Deck</button>
             </router-link>
             <br>
@@ -267,6 +346,7 @@ const adddeck = Vue.component('adddeck',{
         current_user:{'username':undefined,'user_id':undefined},
         url_api_whoami:'http://'+window.location.host+'/api-whoami',
         url_dashboard:'http://'+window.location.host+'/dashboard',
+        url_decks:'http://'+window.location.host+'/decks',
         url_api_manage_deck:'http://'+window.location.host+'/api-manage-decks',
         deck_name:undefined,
         deck_description:undefined,
@@ -329,6 +409,7 @@ const adddeck = Vue.component('adddeck',{
                 if (data["authenticated"]) {
                     if (data['success']){
                         alert('Deck added!')
+                        window.location.href = this.url_decks
                     }
                     else{
                         alert('Deck could not be added!')
@@ -377,6 +458,168 @@ const adddeck = Vue.component('adddeck',{
 
 
 
+// DELETEDECKS COMPONENT START
+const deletedecks = Vue.component('deletedecks',{
+
+    // COMPONENT DELIMITER
+    delimiters:["{[","]}"],
+    
+    // COMPONENT TEMPLATE
+    template:`
+    <div class="decks-view">
+        <div v-if="loading">
+        <img stryle="" src="static/img/loader3.gif" alt="loading" width="50" height="50">
+        </div>
+        <div v-else>
+            <router-link to="/">
+                <button class="btn btn-info btn-size-1">View Decks</button>
+            </router-link>
+            <router-link to="/adddeck">
+                <button class="btn btn-success btn-size-1">Add Deck</button>
+            </router-link>
+            <br>
+            <br>
+            <button class="btn btn-danger btn-size-1" @click="submit()">Delete</button>
+            <br>
+            <deckselector v-for="(deck,i) in decks" :index="i" :deck="deck" :current_user="current_user"></deckselector>
+        </div>    
+    </div>
+    `,
+    
+    // COMPONENT DATA
+    data: function() {
+        return {
+        loading:true,
+        current_user:{'username':undefined,'user_id':undefined},
+        url_api_whoami:'http://'+window.location.host+'/api-whoami',
+        url_dashboard:'http://'+window.location.host+'/dashboard',
+        url_api_manage_deck:'http://'+window.location.host+'/api-manage-decks',
+        url_decks:'http://'+window.location.host+'/decks',
+        url_api_populate_decksview:'http://'+window.location.host+'/api-load-all-decks',
+        decks:[],
+       }
+
+    },
+
+    
+    // COMPONENT METHODS
+    methods :{
+        load_user:function (auth_token){
+            fetch(this.url_api_whoami,{method:'GET',headers:{'Content-Type':'application/json','auth-token':auth_token},})
+            .then((response)=>{
+                if (!response.ok){
+                    console.log("Response not ok");
+                }
+            return response.json();
+                })
+            .then((data)=>{
+                if (data["authenticated"]) {
+                    this.current_user['username'] = data["username"];
+                    this.current_user['user_id'] = data["user_id"]
+                    this.pupolate_decksview(auth_token)
+                    this.console.log(data);
+                }
+                else {
+                    this.current_user['username'] = undefined;
+                    this.current_user['user_id'] = undefined;
+                    window.location.href = 'http://'+window.location.host + '/';
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            });   
+        },
+
+        pupolate_decksview:function(auth_token){
+            fetch(this.url_api_populate_decksview,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user['user_id'],'auth_token':auth_token},})
+            .then((response)=>{
+                if (!response.ok){
+                    console.log("Response not ok");
+                }
+            return response.json();
+            })
+            .then((data)=>{
+                console.log(this.decks)
+                this.decks = data["decks"]
+                this.loading=false
+            })
+            .catch((error)=>{
+                console.log(error);
+            });
+        },
+
+        submit:function(){
+            let deck_ids = []
+            let user_id = this.current_user['user_id']
+            let auth_token = this.getCookie('auth-token')
+            for (x of store.state.delete_deck_ids){
+                deck_ids.push(x)
+            }
+            console.log(deck_ids)
+            if (deck_ids.length != 0){
+                fetch(this.url_api_manage_deck,{method:'DELETE',headers:{'Content-Type':'application/json','auth_token':auth_token},
+                body:JSON.stringify({'deck_ids':deck_ids,'user_id':this.current_user['user_id']})
+                })
+                .then((response)=>{
+                    if (!response.ok){
+                        console.log("Response not ok");
+                    }
+                return response.json();
+                })
+                .then((data)=>{
+                    if (data['authenticated']){
+                        if (data['success']){
+                            alert('Deck Deleted!')
+                            window.location.href = this.url_decks
+                        }
+                        else{
+                            alert('Deck Could not be deleted!')
+                        }
+                    }
+                    else{
+                        console.log(data)
+                    }
+                })
+                .catch((error)=>{
+                    console.log(error);
+                });
+                
+            }
+            
+        },
+
+        getCookie:function(cname) {
+            let name = cname + "=";
+            let ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+              let c = ca[i];
+              while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+              }
+              if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+              }
+            }
+            return null;
+          },
+    }, 
+
+    // MOUNTED
+    mounted:function(){
+        let auth_token = this.getCookie('auth-token')
+        if (auth_token != null){
+            console.log('auth-token : '+auth_token)
+            this.load_user(auth_token)
+        }
+        else{
+            window.location.href = 'http://'+window.location.host + '/logout';
+        }
+
+        
+    }
+})
+
+
 
 
 // ROUTES
@@ -389,6 +632,11 @@ const routes = [
     {
         path:'/adddeck',
         component:adddeck,
+    },
+
+    {
+        path:'/deletedecks',
+        component:deletedecks,
     },
 ]
 
