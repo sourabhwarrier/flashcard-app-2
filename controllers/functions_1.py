@@ -76,8 +76,11 @@ def countcards(deck_id):
     return len(cards)
         
 
-def get_decks_for_user(user_id):
-    decks = db.session.query(Deck).filter(or_(Deck.owner==user_id,Deck.visibility=='Public')).all()
+def get_decks_for_user(user_id,purpose):
+    if purpose == 'all':
+        decks = db.session.query(Deck).filter(or_(Deck.owner==user_id,Deck.visibility=='Public')).all()
+    elif purpose == 'restricted':
+        decks = db.session.query(Deck).filter(Deck.owner==user_id).all()
     deck_list = []
     for deck in decks:
         deckstat = db.session.query(DeckStat).filter(DeckStat.deck_id==deck.deck_id).first()

@@ -143,9 +143,10 @@ class DecksAPI(Resource):
         print(current_user.id)
         print(str(current_user.id) == str(client))
         print("auth in dpa: ",current_user.is_authenticated)
+        purpose = request.headers['purpose']
         if current_user.is_authenticated and str(current_user.id) == str(client):
             if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
-                decks = get_decks_for_user(current_user.id)
+                decks = get_decks_for_user(current_user.id,purpose)
                 print("deck fetched ", decks)
                 return {'authenticated':True,'decks':decks},200
             else:

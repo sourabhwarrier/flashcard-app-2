@@ -249,7 +249,7 @@ const decksview = Vue.component('decksview',{
         },
 
         pupolate_decksview:function(auth_token){
-            fetch(this.url_api_populate_decksview,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user['user_id'],'auth_token':auth_token},})
+            fetch(this.url_api_populate_decksview,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user['user_id'],'auth_token':auth_token,'purpose':'all'},})
             .then((response)=>{
                 if (!response.ok){
                     console.log("Response not ok");
@@ -531,7 +531,7 @@ const deletedecks = Vue.component('deletedecks',{
         },
 
         pupolate_decksview:function(auth_token){
-            fetch(this.url_api_populate_decksview,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user['user_id'],'auth_token':auth_token},})
+            fetch(this.url_api_populate_decksview,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user['user_id'],'auth_token':auth_token,'purpose':'restricted'},})
             .then((response)=>{
                 if (!response.ok){
                     console.log("Response not ok");
