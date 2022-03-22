@@ -21,6 +21,14 @@ body {
     padding: 10px 30px 10px 30px;
 }
 
+.login-form-input{
+    width:265px !important;
+}
+
+.signup-form-input{
+    width:265px !important;
+}
+
 .root-label1{
     padding-left: 0px;
     padding-right: 18px;

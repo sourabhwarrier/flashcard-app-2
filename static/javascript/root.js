@@ -18,11 +18,11 @@ const start = Vue.component('start',{
     </div>
     <div v-else>
         <router-link to="/signup">
-            <button class="root-btn-submit1">Sign Up</button>
+            <button class="btn btn-light root-btn-submit1">Sign Up</button>
         </router-link>
         </br class="line">
         <router-link to="/login">
-            <button class="root-btn-submit1">Log In</button>
+            <button class="btn btn-light root-btn-submit1">Log In</button>
         </router-link>
         <p v-if="somethingwrong">Unable to register. Something went wrong :(</p>
         <p v-if= "invalid_email || email_in_use || username_in_use">Please fix the following errors</p>
@@ -107,6 +107,22 @@ const signup = Vue.component('signup',{
             <img stryle="" src="static/img/loader3.gif" alt="loading" width="100" height="100">
         </div>
         <div v-else>
+            <div class="mb-3 mb-3-custom">
+                <label for="signup-form-input-username" class="form-label signup-form-label">Username</label>
+                <input v-model="username" type="text" class="form-control signup-form-input" id="signup-form-input-username" placeholder="Username (> 4 characters)">
+            </div>
+            
+            <div class="mb-3 mb-3-custom">
+                <label for="signup-form-input-email" class="form-label signup-form-label">Email</label>
+                <input v-model="email" type="text" class="form-control signup-form-input" id="signup-form-input-email" placeholder="Email">
+            </div>
+
+            <div class="mb-3 mb-3-custom">
+                <label for="signup-form-input-password" class="form-label signup-form-label">Password</label>
+                <input v-model="password" type="password" class="form-control signup-form-input" id="signup-form-input-password" placeholder="Password (> 5 characters)">
+            </div>
+
+            <!--
             <p class="root-label1">Username</p>
             <input type="text" class="root-input1" v-model="username">
             <p class="root-label1">Email</p>
@@ -114,10 +130,11 @@ const signup = Vue.component('signup',{
             <p class="root-label1">password</p>
             <input type="password" class="root-input1" v-model="password">
             </br class="line">
-            <button class="root-btn-submit1" @click=submit()>Sign Up</button>
+            -->
+            <button class="btn btn-light root-btn-submit1" @click=submit()>Sign Up</button>
             </br class="line">
             <router-link to="/login">
-                <button class="root-btn-submit1">Log In</button>
+                <button class="btn btn-light root-btn-submit1">Log In</button>
             </router-link>
             <p v-if="somethingwrong">Unable to register. Something went wrong :(</p>
             <p v-if= "invalid_email || email_in_use || username_in_use || username_length_incorrect || password_length_incorrect">Please fix the following errors</p>
@@ -262,15 +279,28 @@ const login = Vue.component('login',{
             <img stryle="" src="static/img/loader3.gif" alt="loading" width="100" height="100">
         </div>
         <div v-else>
+
+            <div class="mb-3 mb-3-custom">
+                <label for="login-form-input-name" class="form-label login-form-label">Username</label>
+                <input v-model="username" type="text" class="form-control login-form-input" id="login-form-input-name" placeholder="Username (> 4 characters)">
+            </div>
+
+            <div class="mb-3 mb-3-custom">
+                <label for="login-form-input-password" class="form-label login-form-label">Password</label>
+                <input v-model="password" type="password" class="form-control login-form-input" id="login-form-input-password" placeholder="Password (> 5 characters)">
+            </div>
+
+            <!--
             <p class="root-label1">Username</p>
             <input type="text" class="root-input1" v-model="username">
             <p class="root-label1">password</p>
             <input type="password" class="root-input1" v-model="password">
+            -->
             </br class="line">
-            <button class="root-btn-submit1" @click=submit()>Log in</button>
+            <button class="btn btn-light root-btn-submit1" @click=submit()>Log in</button>
             </br class="line">
             <router-link to="/signup">
-                <button class="root-btn-submit1">Sign up</button>
+                <button class="btn btn-light root-btn-submit1">Sign up</button>
             </router-link>
             <p v-if="somethingwrong">Unable to register. Something went wrong :(</p>
             <p v-if= "user_not_exists || password_incorrect || username_length_incorrect || password_length_incorrect">Please fix the following errors</p>
@@ -279,7 +309,7 @@ const login = Vue.component('login',{
             <p v-if="username_length_incorrect">Username length must be > 4</p>
             <p v-if="password_length_incorrect">Password length must be > 5</p>
         </div>
-        </div>
+    </div>
     `,
     
     // COMPONENT DATA
@@ -407,7 +437,12 @@ const routes = [
     {
         path:'/login',
         component:login,
-    }
+    },
+
+    {
+        path:'/*',
+        component:start,
+    },
 ]
 
 const router = new VueRouter({
