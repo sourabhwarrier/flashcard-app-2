@@ -5,8 +5,8 @@ from flask_restful import Resource
 from flask import request,jsonify
 from flask_security import current_user, login_user, logout_user
 from datetime import datetime
-from controllers.functions_1 import add_deck, delete_deck, email_exists, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, sha3512, username_exists
-from models.models import Deck, User, user_datastore
+from controllers.functions_1 import add_card, add_deck, check_if_deck_owner, delete_card, delete_deck, email_exists, get_cards_by_deck, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, sha3512, username_exists
+from models.models import Card, Deck, User, user_datastore
 from db.database import db
 
 # USER VALIDATION API
@@ -159,6 +159,73 @@ class DecksAPI(Resource):
         pass
     def delete(self):
         pass
+
+
+# Cards API
+class CardsAPI(Resource):
+    def get(self):
+        client = request.headers["user_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        deck_id = request.headers['deck_id']
+        print("requested deck : ",deck_id)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                cards = get_cards_by_deck(deck_id)
+                editable,deck_name,deck_description,visibility=check_if_deck_owner(deck_id,client)
+                print("deck fetched ", cards)
+                print("editable", editable)
+                return {'authenticated':True,'cards':cards,'editable':editable,'deck_name':deck_name,'deck_description':deck_description,'visibility':visibility},200
+            else:
+                {"authenticated": False,"username":current_user.username},200
+        else:
+            return {"authenticated": False,"username":None},200
+    def put(self):
+        pass
+    def post(self):
+        client = request.headers["user_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                deck_id = request.get_json()['deck_id']
+                question = request.get_json()['question']
+                hint = request.get_json()['hint']
+                answer = request.get_json()['answer']
+                new_card = Card(deck_id=deck_id,question=question,hint=hint,answer=answer)
+                try:
+                    add_card(new_card)
+                    return {'authenticated':True,'success':True},200
+                except:
+                    return {'authenticated':True,'success':False}
+            else:
+                {"authenticated": False,"username":current_user.username},200
+        else:
+            return {"authenticated": False,"username":None},200
+    def delete(self):
+        client = request.get_json()["user_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                card_ids = request.get_json()['card_ids']
+                try:
+                    print('to delete cards: ',card_ids)
+                    for card_id in card_ids:
+                        delete_card(int(card_id))
+                    return {'authenticated':True,'success':True},200
+                except:
+                    return {'authenticated':True,'success':False}
+            else:
+                {"authenticated": False,"username":current_user.username},200
+        else:
+            return {"authenticated": False,"username":None},200
 
 
 # DECK VISIBILITY API

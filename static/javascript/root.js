@@ -437,7 +437,12 @@ const routes = [
     {
         path:'/login',
         component:login,
-    }
+    },
+
+    {
+        path:'/*',
+        component:start,
+    },
 ]
 
 const router = new VueRouter({

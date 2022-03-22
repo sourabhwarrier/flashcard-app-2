@@ -106,8 +106,29 @@ def get_decks_for_user(user_id,purpose):
 
 
 def get_cards_by_deck(deck_id):
+    deck = db.session.query(Deck).filter(Deck.deck_id==deck_id).first()
     cards = db.session.query(Card).filter(Card.deck_id==deck_id).all()
-    return cards
+    card_list = []
+    deck_name = deck.name
+    for card in cards:
+        card_id = card.card_id
+        question = card.question
+        hint = card.hint
+        answer = card.answer
+        card_obj = {'deck_id':deck_id,
+        'card_id':card_id,
+        'question':question,
+        'hint':hint,
+        'answer':answer,
+        'deck_name':deck_name 
+        }
+        card_list.append(card_obj)
+    return card_list
+
+def add_card(card):
+    cards = db.session.add(card)
+    db.session.commit()
+
 
 def delete_card(card_id):
     db.session.query(Card).filter(Card.card_id==card_id).delete()
@@ -122,3 +143,14 @@ def delete_deck(deck_id):
         delete_card(card.card_id)
     db.session.query(Deck).filter(Deck.deck_id==deck_id).delete()
     db.session.commit()
+
+def check_if_deck_owner(deck_id,user_id):
+    deck = db.session.query(Deck).filter(Deck.deck_id==deck_id).first()
+    if deck:
+        print(deck.owner,user_id)
+        if str(deck.owner) == str(user_id):
+            return True,deck.name,deck.description,deck.visibility
+        else:
+            return False,deck.name,deck.description,deck.visibility
+    else:
+        return False,None
