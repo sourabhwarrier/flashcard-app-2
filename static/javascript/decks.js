@@ -494,7 +494,7 @@ const adddeck = Vue.component('adddeck',{
               </div>
               </div>
               <a class="btn btn-primary card-button-2" style="float: right;" @click="submit()">Add</a>
-              <a class="btn btn-primary card-button-2" style="float: right; margin-right: 10px;">Import</a>
+              <!--<a class="btn btn-primary card-button-2" style="float: right; margin-right: 10px;">Import</a>-->
             </div>  
         </div>    
     </div>
@@ -732,15 +732,16 @@ const editdeck = Vue.component('editdeck',{
             .then((data)=>{
                 if (data["authenticated"]) {
                     if (data['success']){
-                        alert('Deck added!')
+                        alert('Changes saved!')
                         window.location.href = this.url_decks
                     }
                     else{
-                        alert('Deck could not be added!')
+                        alert('Changes could not be saved!')
                     }
                 }
                 else {
-                    this.deck.visibility = current_visibility;
+                    //this.deck.visibility = current_visibility;
+                    alert('You are not allowed to do this!')
                 }
             })
             .catch((error)=>{
@@ -1120,8 +1121,14 @@ const cardsview = Vue.component('cardsview',{
 
     // MOUNTED
     mounted:function(){
+        console.log(sessionStorage.getItem('current_deck_being_viewed'));
         if (store.state.current_deck_being_viewed){
             this.deck_id = store.state.current_deck_being_viewed
+        }
+        else if (sessionStorage.getItem('current_deck_being_viewed')){
+            store.state.current_deck_being_viewed = sessionStorage.getItem('current_deck_being_viewed')
+            this.deck_id = store.state.current_deck_being_viewed
+            sessionStorage.clear()
         }
         else{
             window.location.href = 'http://'+window.location.host + '/decks';
@@ -1534,6 +1541,7 @@ const app = new Vue({
     el:'#app',
     router:router,
     data:{
+        userloaded:false,
         current_user:{'username':undefined,'uder_id':undefined},
         url_api_whoami:'http://'+window.location.host+'/api-whoami',
     },
@@ -1550,6 +1558,7 @@ const app = new Vue({
                 if (data["authenticated"]) {
                     this.current_user['username'] = data["username"];
                     this.current_user['user_id'] = data["user_id"]
+                    this.userloaded=true;
                     this.console.log(data);
                 }
                 else {

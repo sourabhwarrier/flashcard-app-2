@@ -5,7 +5,7 @@ from flask_restful import Resource
 from flask import request,jsonify
 from flask_security import current_user, login_user, logout_user
 from datetime import datetime
-from controllers.functions_1 import add_card, add_deck, check_if_deck_owner, delete_card, delete_deck, email_exists, get_cards_by_deck, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, sha3512, username_exists
+from controllers.functions_1 import add_card, add_deck, check_if_deck_owner, delete_card, delete_deck, email_exists, get_cards_by_deck, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, sha3512, update_deck, username_exists
 from models.models import Card, Deck, User, user_datastore
 from db.database import db
 
@@ -265,7 +265,29 @@ class DeckAPI(Resource):
     def get(self):
         pass
     def put(self):
-        pass
+        client = request.get_json()["user_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                deck_id = request.get_json()['deck_id']
+                deck_name = request.get_json()['deck_name']
+                deck_description = request.get_json()['deck_description']
+                visibility = request.get_json()['visibility']
+                if check_if_deck_owner(deck_id,client):
+                    try:
+                        update_deck(deck_id,deck_name,deck_description,visibility)
+                        return {'authenticated':True,'success':True},200
+                    except:
+                        return {'authenticated':True,'success':False}
+                else:
+                    {"authenticated": False,"username":current_user.username},200
+            else:
+                {"authenticated": False,"username":current_user.username},200
+        else:
+            return {"authenticated": False,"username":None},200
     def post(self):
         client = request.get_json()["user_id"]
         print("client : " ,client)

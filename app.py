@@ -42,7 +42,7 @@ def root():
         return redirect(url_for("error.html"))
 
 # ROUTE FOR DASHBOARD
-@app.route('/dashboard',methods=["GET","POST"])
+@app.route('/dashboard',methods=["GET"])
 def dashboard():
     if current_user.is_authenticated:
         print("User logged in : ",current_user.is_authenticated, " as : ", current_user.username)
@@ -56,12 +56,26 @@ def dashboard():
 
 
 # ROUTE FOR decks
-@app.route('/decks',methods=["GET","POST"])
+@app.route('/decks',methods=["GET"])
 def decks():
     if current_user.is_authenticated:
         print("User logged in : ",current_user.is_authenticated, " as : ", current_user.username)
         print(get_decks_for_dashboard(current_user.id))
         return render_template("decks.html")
+    else:
+        print("User logged in : ",current_user.is_authenticated)
+        return redirect(url_for("root"))
+    #except:
+    #    return redirect(url_for("error.html"))
+
+
+# ROUTE FOR decks
+@app.route('/quiz',methods=["GET"])
+def quiz():
+    if current_user.is_authenticated:
+        print("User logged in : ",current_user.is_authenticated, " as : ", current_user.username)
+        print(get_decks_for_dashboard(current_user.id))
+        return render_template("quiz.html")
     else:
         print("User logged in : ",current_user.is_authenticated)
         return redirect(url_for("root"))

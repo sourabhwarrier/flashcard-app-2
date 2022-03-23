@@ -138,9 +138,13 @@ def add_deck(deck):
     db.session.add(deck)
     db.session.commit()
 
+def update_deck(deck_id,deck_name,deck_description,deck_visibility):
+    db.session.query(Deck).filter(Deck.deck_id==deck_id).update({"name":deck_name,"description":deck_description,'visibility':deck_visibility})
+    db.session.commit()
+
 def delete_deck(deck_id):
     for card in get_cards_by_deck(deck_id):
-        delete_card(card.card_id)
+        delete_card(card['card_id'])
     db.session.query(Deck).filter(Deck.deck_id==deck_id).delete()
     db.session.commit()
 

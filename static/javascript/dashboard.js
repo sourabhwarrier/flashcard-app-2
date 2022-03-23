@@ -21,13 +21,41 @@ const deck = Vue.component("deck-stat",{
         <p class="card-text">{[ deck.description ]}</p>
         <p class="card-text">Average Score : {[ deck.average_score ]}</p>
         <p class="card-text">Times reviewed : {[ deck.times_reviewed ]}</p>
-        <a href="#" class="btn btn-primary card-button-1">Open deck</a>
+        <a href="#" class="btn btn-primary card-button-1" @click="opendeck()">Open deck</a>
     </div>
     <div class="card-footer text-muted">
         Last reviewed : {[ deck.last_reviewed ]}
     </div>
   </div>
     `,
+
+    methods:{
+        opendeck:function(){
+            sessionStorage.setItem('current_deck_being_viewed', this.deck.deck_id);
+            window.location.href = 'http://'+window.location.host + '/decks#/cards';
+        },
+
+        setCookie: function(cname, cvalue, exhours) {
+            const d = new Date();
+            d.setTime(d.getTime() + (exhours*60*60*1000));
+            let expires = "expires="+ d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+          },
+        getCookie:function(cname) {
+            let name = cname + "=";
+            let ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+              let c = ca[i];
+              while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+              }
+              if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+              }
+            }
+            return null;
+          }
+    }
 })
 
 
@@ -50,8 +78,7 @@ const app = new Vue({
     data: function(){
         return {
             loading:true,
-            current_user_name:undefined,
-            current_user_id:undefined,
+            current_user:{'username':undefined,'user_id':undefined},
             url_api_whoami:'http://'+window.location.host+'/api-whoami',
             url_dashboard:'http://'+window.location.host+'/dashboard',
             url_api_populate_dashboard:'http://'+window.location.host+'/api-populate-dashboard',
@@ -71,14 +98,14 @@ const app = new Vue({
                 })
             .then((data)=>{
                 if (data["authenticated"]) {
-                    this.current_user_name = data["username"];
-                    this.current_user_id = data["user_id"]
+                    this.current_user['username'] = data["username"];
+                    this.current_user['user_id'] = data["user_id"]
                     this.pupolate_dashboard(auth_token)
                     this.console.log(data);
                 }
                 else {
-                    this.current_user_name = undefined;
-                    this.current_user_id = undefined;
+                    this.current_user['username'] = undefined;
+                    this.current_user['user_id'] = undefined;
                     window.location.href = 'http://'+window.location.host + '/';
                 }
             })
@@ -88,7 +115,7 @@ const app = new Vue({
         },
 
         pupolate_dashboard:function(auth_token){
-            fetch(this.url_api_populate_dashboard,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user_id,'auth-token':auth_token},})
+            fetch(this.url_api_populate_dashboard,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user['user_id'],'auth-token':auth_token},})
             .then((response)=>{
                 if (!response.ok){
                     console.log("Response not ok");
