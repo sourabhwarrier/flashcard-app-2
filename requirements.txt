@@ -4,3 +4,4 @@ flask-security-too
 matplotlib
 email-validator
 bcrypt
+celery

@@ -1,7 +1,15 @@
 // DEBUG
 console.log("DEBUG : loaded quiz.js");
 
-
+// GLOBAL STORE
+const store = new Vuex.Store({
+    state:{
+        current_deck_being_viewed:null,
+        current_deck_being_deleted_from:null,
+        current_deck_being_edited:null,
+        current_deck_being_added_to:null,
+    }
+});
 
 // DECK COMPONENT START
 const deck = Vue.component("deck",{
