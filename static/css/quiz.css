@@ -32,10 +32,8 @@
     float: none !important;
     display: inline !important;
 }
-.custom-switch-form{
-    margin-left: -40px;
-    float: right !important;
-    display: inline-block !important;
+.custom-check-form{
+    margin-bottom: 20px !important;
 }
 
 
@@ -78,14 +76,16 @@
     
 }
 
-.deck-form-label{
+.question-form-label{
     float: left;
+    margin-top: 4px;
+    margin-left: 10px;
+    font-size: medium;
 }
 
-.deck-form-input{
-    margin: auto;
-    height: 45px !important;
-    width: 265px !important;
+.custom-check{
+    height: 25px !important;
+    width: 25px !important;
 }
 
 .user-icon{

@@ -3,6 +3,7 @@ from models.models import Card, Deck, User,DeckStat
 from sqlalchemy import *
 import random
 import hashlib
+from datetime import datetime
 #import matplotlib.pyplot as plt
 #import base64
 #from io import BytesIO
@@ -57,7 +58,7 @@ def get_decks_for_dashboard(user_id):
         description = deck.description
         average_score = deckstat.average_score
         times_reviewed = deckstat.times_reviewed
-        last_reviewed = deckstat.last_reviewed
+        last_reviewed = format_datetime(deckstat.last_reviewed)
         deck_obj = {'owner':owner,
         'visibility':visibility,
         'name':name,
@@ -83,11 +84,11 @@ def get_decks_for_user(user_id,purpose):
         decks = db.session.query(Deck).filter(Deck.owner==user_id).all()
     deck_list = []
     for deck in decks:
-        deckstat = db.session.query(DeckStat).filter(DeckStat.deck_id==deck.deck_id).first()
+        deckstat = db.session.query(DeckStat).filter(DeckStat.deck_id==deck.deck_id).filter(DeckStat.user_id==user_id).first()
         if deckstat==None:
             last_reviewed='Never'
         else:
-            last_reviewed=deckstat.last_reviewed
+            last_reviewed=format_datetime(deckstat.last_reviewed)
         deck_id = deck.deck_id
         number_of_cards = countcards(deck.deck_id)
         owner = get_user_by_id(deck.owner).username
@@ -158,3 +159,61 @@ def check_if_deck_owner(deck_id,user_id):
             return False,deck.name,deck.description,deck.visibility
     else:
         return False,None
+
+def load_decks_quiz_selector(user_id):
+    deck_list = []
+    temp_decks = db.session.query(Deck).all()
+    for deck in temp_decks:
+        count = countcards(deck.deck_id)
+        if count > 0:
+            deckstat = db.session.query(DeckStat).filter(DeckStat.deck_id==deck.deck_id).filter(DeckStat.user_id==user_id).first()
+            if deckstat==None:
+                last_reviewed='Never'
+            else:
+                last_reviewed=format_datetime(deckstat.last_reviewed)
+            deck_id = deck.deck_id
+            number_of_cards = count
+            owner = get_user_by_id(deck.owner).username
+            visibility = deck.visibility
+            name = deck.name
+            description = deck.description
+            deck_obj = {'owner':owner,
+            'visibility':visibility,
+            'name':name,
+            'description':description,
+            'number_of_cards':number_of_cards,
+            'deck_id':deck_id,
+            'last_reviewed':last_reviewed}
+            deck_list.append(deck_obj)
+    return deck_list
+
+
+def format_datetime(unix):
+    return datetime.utcfromtimestamp(int(unix)).strftime('%Y-%m-%d %H:%M:%S')
+
+
+def question_gen(deck_id):
+    cards = db.session.query(Card).filter(Card.deck_id==deck_id).all()
+    questions_set = []
+    with open('data/wordlist.txt') as f:
+        W = f.readlines()
+        n = len(W)
+        index = 1
+        for card in cards:
+            options = [card.answer]
+            while len(options) < 4:
+                idx = random.randint(0,n-1)
+                print(idx)
+                if W[idx] not in options and W[idx]:
+                    options.append(W[idx].capitalize())
+            random.shuffle(options)
+            question_obj = {
+            'card_id':card.card_id,
+            'deck_id':card.deck_id,
+            'index':index,
+            'question':card.question,
+            'hint':card.hint,
+            'options':options}
+            questions_set.append(question_obj)
+    return questions_set
+            #print("options generated : ",options)

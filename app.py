@@ -10,7 +10,7 @@ from models.models import User, user_datastore
 import os
 from application.configuration import appConfig
 from db.database import db
-from api.api import CardsAPI, DeckAPI, DeckVisibilityAPI, DecksAPI, PopulateDashboardAPI, UserLoginAPI, UserValAPI, WhoamiAPI
+from api.api import CardsAPI, DeckAPI, DeckVisibilityAPI, DecksAPI, PopulateDashboardAPI, QuizManager, QuizLoader, UserLoginAPI, UserValAPI, WhoamiAPI
 
 #IMPORTS END
 
@@ -105,6 +105,8 @@ api.add_resource(DecksAPI,"/api-load-all-decks")
 api.add_resource(DeckVisibilityAPI,"/api-update-deck-visibility")
 api.add_resource(DeckAPI,"/api-manage-decks")
 api.add_resource(CardsAPI,"/api-manage-cards")
+api.add_resource(QuizLoader,"/api-quiz-loader")
+api.add_resource(QuizManager,"/api-quiz")
 
 if __name__== "__main__":
     app.run(debug=True)

@@ -6,7 +6,9 @@
     }
 
 .logout-button{
-        margin-left: 69vw;
+        /*margin-left: 69vw;*/
+        margin-left: auto !important;
+        margin-right: 0px !important;
         float: right !important;
     }
 .logout-button:hover{
