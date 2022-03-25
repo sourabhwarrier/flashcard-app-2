@@ -2,7 +2,7 @@ from flask_restful import Resource
 from flask import request
 from flask_security import current_user, login_user
 from datetime import datetime
-from functions.functions_1 import add_card, add_deck, check_if_deck_owner, delete_card, delete_deck, email_exists, export_deck, get_cards_by_deck, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, load_decks_quiz_selector, question_gen, quick_quiz_score, sha3512, update_deck, username_exists
+from functions.functions_1 import add_card, add_deck, check_if_deck_owner, delete_card, delete_deck, email_exists, export_deck, get_cards_by_deck, get_deck_by_deck_id, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, load_decks_quiz_selector, question_gen, quick_quiz_score, sha3512, update_deck, update_deckstats, update_participation, update_rating, username_exists
 from models.models import Card, Deck, User, user_datastore
 from db.database import db
 import time
@@ -171,11 +171,15 @@ class CardsAPI(Resource):
         print("requested deck : ",deck_id)
         if current_user.is_authenticated and str(current_user.id) == str(client):
             if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
-                cards = get_cards_by_deck(deck_id)
-                editable,deck_name,deck_description,visibility=check_if_deck_owner(deck_id,client)
-                print("deck fetched ", cards)
-                print("editable", editable)
-                return {'authenticated':True,'cards':cards,'editable':editable,'deck_name':deck_name,'deck_description':deck_description,'visibility':visibility},200
+                deck = get_deck_by_deck_id(deck_id)
+                if str(deck.owner) == client or deck.visibility == "Public":
+                    cards = get_cards_by_deck(deck_id)
+                    editable,deck_name,deck_description,visibility=check_if_deck_owner(deck_id,client)
+                    print("deck fetched ", cards)
+                    print("editable", editable)
+                    return {'authenticated':True,'cards':cards,'editable':editable,'deck_name':deck_name,'deck_description':deck_description,'visibility':visibility},200
+                else:
+                   return {"authenticated": False,"username":current_user.username},200
             else:
                 {"authenticated": False,"username":current_user.username},200
         else:
@@ -317,13 +321,13 @@ class DeckAPI(Resource):
         if current_user.is_authenticated and str(current_user.id) == str(client):
             if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
                 deck_ids = request.get_json()['deck_ids']
-                try:
-                    print('to delete : ',deck_ids)
-                    for deck_id in deck_ids:
-                        delete_deck(int(deck_id))
-                    return {'authenticated':True,'success':True},200
-                except:
-                    return {'authenticated':True,'success':False}
+                #try:
+                print('to delete : ',deck_ids)
+                for deck_id in deck_ids:
+                    delete_deck(int(deck_id))
+                return {'authenticated':True,'success':True},200
+                #except:
+                #    return {'authenticated':True,'success':False}
             else:
                 {"authenticated": False,"username":current_user.username},200
         else:
@@ -391,16 +395,21 @@ class QuizManager(Resource):
         print("auth in dpa: ",current_user.is_authenticated)
         if current_user.is_authenticated and str(current_user.id) == str(client):
             if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
-                try:
-                    deck_id = request.get_json()["deck_id"]
-                    submission = request.get_json()["submission"]
-                    rating = request.get_json()["rating"]
-                    print(deck_id,submission,rating)
-                    correct,total = quick_quiz_score(deck_id,submission)
-                    percentage = round(correct/total*100,2)
-                    return {'authenticated':True,'success':True,'correct':correct,'total':total,'percentage':percentage},200
-                except:
-                    return {'authenticated':True,'success':False},200
+                #try:
+                deck_id = request.get_json()["deck_id"]
+                submission = request.get_json()["submission"]
+                rating = request.get_json()["rating"]
+                now = int(time.time())
+                correct,total = quick_quiz_score(deck_id,submission)
+                percentage = round(correct/total*100,2)
+                if rating:
+                    update_rating(deck_id,rating)
+                print(deck_id,submission,rating)
+                update_deckstats(client,deck_id,now,percentage)
+                update_participation(client)
+                return {'authenticated':True,'success':True,'correct':correct,'total':total,'percentage':percentage},200
+                #except:
+                #    return {'authenticated':True,'success':False},200
             else:
                 {"authenticated": False,"username":current_user.username},200
         else:

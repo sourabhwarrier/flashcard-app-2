@@ -45,7 +45,7 @@ def root():
 # ROUTE FOR DASHBOARD
 @app.route('/dashboard',methods=["GET"])
 def dashboard():
-    try:
+    #try:
         if current_user.is_authenticated:
             print("User logged in : ",current_user.is_authenticated, " as : ", current_user.username)
             print(get_decks_for_dashboard(current_user.id))
@@ -53,8 +53,9 @@ def dashboard():
         else:
             print("User logged in : ",current_user.is_authenticated)
             return redirect(url_for("root"))
-    except:
-        return redirect(url_for("error"))
+    #except:
+    #
+    #    return redirect(url_for("error"))
 
 
 # ROUTE FOR decks

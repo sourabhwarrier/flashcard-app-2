@@ -1,10 +1,11 @@
 from db.database import db
-from models.models import Card, Deck, User,DeckStat
+from models.models import Card, Deck, Rating, User,DeckStat,Participation,Performance
 from sqlalchemy import *
 import random
 import hashlib
 from datetime import datetime
 import os
+import time
 #import matplotlib.pyplot as plt
 #import base64
 #from io import BytesIO
@@ -58,6 +59,7 @@ def get_decks_for_dashboard(user_id):
         deck_id=deck.deck_id
         description = deck.description
         average_score = deckstat.average_score
+        rating=get_rating(deckstat.deck_id)
         times_reviewed = deckstat.times_reviewed
         last_reviewed = format_datetime(deckstat.last_reviewed)
         deck_obj = {'owner':owner,
@@ -65,11 +67,13 @@ def get_decks_for_dashboard(user_id):
         'name':name,
         'description':description,
         'average_score':average_score,
+        'rating':rating,
         'times_reviewed':times_reviewed,
         'last_reviewed':last_reviewed,
         'deck_id':deck_id,
         'number_of_cards':number_of_cards}
-        deck_list.append(deck_obj)
+        if str(deck.owner) == str(user_id) or deck.visibility == "Public":
+            deck_list.append(deck_obj)
     return deck_list
 
 
@@ -145,6 +149,8 @@ def update_deck(deck_id,deck_name,deck_description,deck_visibility):
     db.session.commit()
 
 def delete_deck(deck_id):
+    delete_ratings(deck_id)
+    delete_deckstats(deck_id)
     for card in get_cards_by_deck(deck_id):
         delete_card(card['card_id'])
     db.session.query(Deck).filter(Deck.deck_id==deck_id).delete()
@@ -244,3 +250,58 @@ def quick_quiz_score(deck_id,submission):
         if card.answer == reply:
             correct_cards+=1
     return correct_cards,number_of_cards
+
+
+def update_rating(deck_id,rating):
+    rating_dict={"Easy":"0","Medium":"1","Hard":"2"}
+    rating_val = rating_dict[rating]
+    rating_obj = Rating(deck_id=deck_id,rating=rating_val)
+    db.session.add(rating_obj)
+    db.session.commit()
+
+def delete_ratings(deck_id):
+    db.session.query(Rating).filter(Rating.deck_id==deck_id).delete()
+    db.session.commit()
+
+def get_rating(deck_id):
+    ratings = db.session.query(Rating).filter(Rating.deck_id==deck_id).all()
+    if len(ratings) == 0:
+        return "No rating yet"
+    rating_val = sum([int(rating.rating) for rating in ratings])/len(ratings)
+    if rating_val<0.7:
+        rating_string="Easy"
+    elif rating_val<1.4:
+        rating_string="Medium"
+    else:
+        rating_string="Hard"
+    return rating_string
+
+
+
+def update_deckstats(user_id,deck_id,last_reviewed,score):
+    deckstat = db.session.query(DeckStat).filter(DeckStat.user_id==user_id).filter(DeckStat.deck_id==deck_id).first()
+    if deckstat == None:
+        new_deckstat = DeckStat(user_id=user_id,deck_id=deck_id,last_reviewed=str(last_reviewed),average_score=str(score),times_reviewed="1")
+        db.session.add(new_deckstat)
+        db.session.commit()
+    else:
+        new_average_score = str(round((float(deckstat.average_score)*int(deckstat.times_reviewed)+float(score))/(int(deckstat.times_reviewed)+1),2))
+        new_times_reviewed = str(int(deckstat.times_reviewed)+1)
+        db.session.query(DeckStat).filter(DeckStat.user_id==user_id).filter(DeckStat.deck_id==deck_id).update({'last_reviewed':last_reviewed,'average_score':new_average_score,'times_reviewed':new_times_reviewed})
+        db.session.commit()
+
+def delete_deckstats(deck_id):
+    db.session.query(DeckStat).filter(DeckStat.deck_id==deck_id).delete()
+    db.session.commit()
+
+
+def update_participation(user_id):
+    older = db.session.query(Participation).filter(Participation.user_id==user_id).first()
+    now = str(int(time.time()))
+    if older == None:
+        participation = Participation(user_id=user_id,last_revised=now)
+        db.session.add(participation)
+        db.session.commit()
+    else:
+        db.session.query(Participation).filter(Participation.user_id==user_id).update({'last_revised':now})
+        db.session.commit()

@@ -292,6 +292,11 @@ const confirmation = Vue.component("confirmation",{
                     store.state.showsubmit=false;
                     store.state.showquiz=false;
                 }
+                else{
+                    console.log(data)
+                    alert("could not update score")
+                    window.location.href = 'http://'+window.location.host + '/dashboard';
+                }
             })
             .catch((error)=>{
                 console.log(error);
