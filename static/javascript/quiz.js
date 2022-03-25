@@ -7,7 +7,10 @@ const store = new Vuex.Store({
         number_of_questions:null,
         current_index:null,
         current_deck_being_quizzed_on:null,
+        current_deck_name_being_quizzed_on:null,
         submissions:[],
+        showquiz:false,
+        showsubmit:false,
     }
 });
 
@@ -19,6 +22,7 @@ const deck = Vue.component("deck",{
     // COMPONENT DATA
     data:function(){
         return{
+            deck_name:this.deck.name,
             deck_id:this.deck.deck_id,
             user_id:this.current_user.user_id,
         }
@@ -49,6 +53,8 @@ const deck = Vue.component("deck",{
     methods:{
 
         startquiz:function(){
+            store.state.current_deck_name_being_quizzed_on=this.deck.name;
+            store.state.showquiz=true
             store.state.current_deck_being_quizzed_on = this.deck_id,
             window.location.href = 'http://'+window.location.host + '/quiz#/active';
         },
@@ -107,7 +113,7 @@ const question = Vue.component("question",{
         <button v-else class="btn btn-primary card-button-1" @click="finish()">Finish</button>
         </div>
         <div class="card-footer text-muted">
-            Last reviewed : {[  ]}
+        <br>
         </div>
     </div>
     `,
@@ -152,6 +158,8 @@ const question = Vue.component("question",{
             this.process();
             console.log(store.state.submissions[0]["reply"])
             console.log("finished");
+            store.state.showquiz=false;
+            store.state.showsubmit=true;
         },
 
 
@@ -180,6 +188,125 @@ const question = Vue.component("question",{
             return this.questions[this.index].options;
         },
     },
+})
+
+
+
+// CONFIRMATION COMPONENT START
+const confirmation = Vue.component("confirmation",{
+    // COMPONENT PROPS
+    //props:["deck","current_user", "index"],
+
+    // COMPONENT DATA
+    data:function(){
+        return{
+           
+        }
+    },
+    // COMPONENT DELIMITER
+    delimiters:["{[","]}"],
+    
+    // COMPONENT TEMPLATE
+    template:`
+    <div class="card text-center table-view">
+        <h4>You are about to submit the following response for {[ deck_name ]}</h4>
+        <br>
+        <br>
+        <table>
+            <tr>
+                <th>Questsion</th>
+                <th>Response</th>
+            </tr>
+            <tr v-for="(x,i) in submissions">
+                <td>{[ i+1 ]}</td>
+                <td v-if="x.reply==undefined">Not answered</td>
+                <td v-else>{[ x.reply ]}</td>
+            </tr>
+        </table>
+        <div class="card-body">
+        <p>Please rate this deck (optional)</p>
+            <div class="form-check custom-check-form">
+                <input class="form-check-input custom-check" type="radio" value="Easy" name="flexRadioDefault" id="flexRadioDefault">
+                <label class="form-check-label question-form-label" for="flexRadioDefault1">Easy</label>
+            </div>
+
+            <div class="form-check custom-check-form">
+                <input class="form-check-input custom-check" type="radio" value="Medium" name="flexRadioDefault" id="flexRadioDefault">
+                <label class="form-check-label question-form-label" for="flexRadioDefault1">Medium</label>
+            </div>
+
+            <div class="form-check custom-check-form">
+                <input class="form-check-input custom-check" type="radio" value="Hard" name="flexRadioDefault" id="flexRadioDefault">
+                <label class="form-check-label question-form-label" for="flexRadioDefault1">Hard</label>
+            </div>
+        <button class="btn btn-primary card-button-2" @click="submit()">Submit</button>
+        </div>
+    </div>
+    `,
+
+    //COMPONENT METHODS
+    methods:{
+
+        process:function(){
+            flag = true;
+            checks = document.getElementsByClassName("custom-check");
+            //console.log(checks.length) // debug
+            for (let i= 0;i<checks.length;i++){
+                check = checks[i];
+                if (check.checked){
+                    flag = false;
+                    rating = check.value
+                }
+            }
+            if (flag){
+                rating = undefined;
+            }
+            submission=store.state.submissions;
+            deck_id=store.state.current_deck_being_quizzed_on
+
+            // FETCH API POST TO QUIZ
+
+
+
+
+
+            // CLEANING UP
+            console.log("rated : "+rating)
+            var selected = document. querySelector('input[type=radio][name=flexRadioDefault]:checked');
+            if (selected){
+            selected. checked = false;
+        }
+        },
+
+        submit:function(){
+            this.process()
+        },
+
+        getCookie:function(cname) {
+            let name = cname + "=";
+            let ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+              let c = ca[i];
+              while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+              }
+              if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+              }
+            }
+            return null;
+          },
+    },
+
+    computed:{
+        submissions:function(){
+            return store.state.submissions;
+        },
+
+        deck_name:function(){
+        return store.state.current_deck_name_being_quizzed_on;
+        }
+    }
 })
 
 
@@ -307,9 +434,14 @@ const quizinterface = Vue.component('quizinterface',{
         <img stryle="" src="static/img/loader3.gif" alt="loading" width="50" height="50">
         </div>
         <div v-else>
+        <div v-if="showquiz">
             <br>
             <question :questions="questions" :length="length"></question>
-        </div>    
+        </div>
+        <div v-else-if="showsubmit">
+            <confirmation></confirmation>
+        </div> 
+        </div>   
     </div>
     `,
     
@@ -415,19 +547,22 @@ const quizinterface = Vue.component('quizinterface',{
         
     },
 
+    computed:{
+        showsubmit:function(){
+            return store.state.showsubmit;
+        },
+
+        showquiz:function(){
+            return store.state.showquiz;
+        }
+    },
+
     destroyed:function(){
+        store.state.current_deck_name_being_quizzed_on=null;
         store.state.current_deck_being_quizzed_on=null;
         store.state.submissions=[];
     }
 })
-
-
-
-
-
-
-
-
 
 
 

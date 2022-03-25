@@ -14,12 +14,22 @@
     width: 500px !important;
 }
 
+.table-view{
+    margin-top: 20px !important;
+    /*box-shadow: 0 4px 8px 0 rgba(0,0,0,0.1) !important;*/
+    margin: auto;
+    justify-content: center !important;
+    width: 500px !important;
+    border: none !important;
+}
+
 .card-button-1{
     width: 120px;
     background-color: #ff7300 !important;
 }
 
 .card-button-2{
+    float: right !important;
     width: 80px;
     background-color: #5596e6 !important;
 }
@@ -89,6 +99,12 @@
 }
 
 .user-icon{
+    margin-top: 3px;
     float: left !important;
     margin-left: 13px;
+}
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
 }

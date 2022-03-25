@@ -194,6 +194,7 @@ def format_datetime(unix):
 
 def question_gen(deck_id):
     cards = db.session.query(Card).filter(Card.deck_id==deck_id).all()
+    #deck = db.session.query(Deck).filter(Deck.deck_id==deck_id).first()
     questions_set = []
     with open('data/wordlist.txt') as f:
         W = f.readlines()
