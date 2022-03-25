@@ -1,7 +1,7 @@
 #IMPORTS BEGIN
 from crypt import methods
 from distutils.log import debug
-from controllers.functions_1 import get_decks_for_dashboard, get_user_by_username, sha3512
+from functions.functions_1 import get_decks_for_dashboard, get_user_by_username, sha3512
 from flask import Flask,session,render_template,request,redirect,g,url_for,send_file
 from flask_security import Security,login_required,login_user,logout_user,current_user
 from flask_security.utils import hash_password
@@ -24,9 +24,10 @@ def create_app():
     app.app_context().push()
     app.secret_key = os.urandom(24)
     return app, api
-    
+
 app,api = create_app()
 security = Security(app,user_datastore)
+
 # INITIALIZATION END
 
 # ROUTE FOR ROOT (LOGIN, SIGNIN, SIGNUP)
