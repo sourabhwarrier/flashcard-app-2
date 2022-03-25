@@ -494,7 +494,7 @@ const adddeck = Vue.component('adddeck',{
               </div>
               </div>
               <a class="btn btn-primary card-button-2" style="float: right;" @click="submit()">Add</a>
-              <a class="btn btn-primary card-button-2" style="float: right; margin-right: 10px;">Import</a>
+              <!--<a class="btn btn-primary card-button-2" style="float: right; margin-right: 10px;">Import</a>-->
             </div>  
         </div>    
     </div>
@@ -732,15 +732,16 @@ const editdeck = Vue.component('editdeck',{
             .then((data)=>{
                 if (data["authenticated"]) {
                     if (data['success']){
-                        alert('Deck added!')
+                        alert('Changes saved!')
                         window.location.href = this.url_decks
                     }
                     else{
-                        alert('Deck could not be added!')
+                        alert('Changes could not be saved!')
                     }
                 }
                 else {
-                    this.deck.visibility = current_visibility;
+                    //this.deck.visibility = current_visibility;
+                    alert('You are not allowed to do this!')
                 }
             })
             .catch((error)=>{
@@ -1005,6 +1006,9 @@ const cardsview = Vue.component('cardsview',{
                 <router-link to="/editdeck">
                     <button class="btn btn-primary btn-size-1" @click="set_deck_edit()">Edit Deck</button>
                 </router-link>
+                
+                <button class="btn btn-primary btn-size-1 card-button-3" @click="export_deck()">Export Deck</button>
+        
                 <br>
             </div>
 
@@ -1031,6 +1035,7 @@ const cardsview = Vue.component('cardsview',{
         url_api_whoami:'http://'+window.location.host+'/api-whoami',
         url_dashboard:'http://'+window.location.host+'/dashboard',
         url_api_populate_cardsview:'http://'+window.location.host+'/api-manage-cards',
+        url_api_export_deck:'http://'+window.location.host+'/api-export-deck',
         cards:[],
        }
 
@@ -1086,6 +1091,30 @@ const cardsview = Vue.component('cardsview',{
             });
         },
 
+        export_deck:function(){
+            let auth_token = this.getCookie('auth-token')
+            fetch(this.url_api_export_deck,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user['user_id'],'auth_token':auth_token,'deck_id':this.deck_id},})
+            .then((response)=>{
+                if (!response.ok){
+                    console.log("Response not ok");
+                }
+            return response.json();
+            })
+            .then((data)=>{
+                console.log(data)
+                if (data["success"]){
+                    let link = 'http://'+window.location.host + '/proc-content/'+data["endpoint"];
+                    window.open(link,'_blank')
+                    
+                }
+                else{
+                    alert("Something went wrong")
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            });
+        },
 
         set_deck_delete:function(){
             store.state.current_deck_being_deleted_from = this.deck_id;
@@ -1120,8 +1149,14 @@ const cardsview = Vue.component('cardsview',{
 
     // MOUNTED
     mounted:function(){
+        console.log(sessionStorage.getItem('current_deck_being_viewed'));
         if (store.state.current_deck_being_viewed){
             this.deck_id = store.state.current_deck_being_viewed
+        }
+        else if (sessionStorage.getItem('current_deck_being_viewed')){
+            store.state.current_deck_being_viewed = sessionStorage.getItem('current_deck_being_viewed')
+            this.deck_id = store.state.current_deck_being_viewed
+            sessionStorage.clear()
         }
         else{
             window.location.href = 'http://'+window.location.host + '/decks';
@@ -1534,6 +1569,7 @@ const app = new Vue({
     el:'#app',
     router:router,
     data:{
+        userloaded:false,
         current_user:{'username':undefined,'uder_id':undefined},
         url_api_whoami:'http://'+window.location.host+'/api-whoami',
     },
@@ -1550,6 +1586,7 @@ const app = new Vue({
                 if (data["authenticated"]) {
                     this.current_user['username'] = data["username"];
                     this.current_user['user_id'] = data["user_id"]
+                    this.userloaded=true;
                     this.console.log(data);
                 }
                 else {

@@ -18,3 +18,20 @@
     
     background-color: #5596e6 !important;
 }
+
+
+.app-contents{
+    position: absolute;
+}
+
+.name-tag{
+    float: left !important;
+    margin-left: 13px;
+    
+}
+
+.user-icon{
+    margin-top: 3px;
+    float: left !important;
+    margin-left: 13px;
+}

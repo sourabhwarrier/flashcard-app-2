@@ -14,19 +14,24 @@
     width: 500px !important;
 }
 
+.table-view{
+    margin-top: 20px !important;
+    /*box-shadow: 0 4px 8px 0 rgba(0,0,0,0.1) !important;*/
+    margin: auto;
+    justify-content: center !important;
+    width: 500px !important;
+    border: none !important;
+}
+
 .card-button-1{
     width: 120px;
-    background-color: #5596e6 !important;
+    background-color: #ff7300 !important;
 }
 
 .card-button-2{
+    float: right !important;
     width: 80px;
     background-color: #5596e6 !important;
-}
-
-.card-button-3{
-    width: 120px;
-    background-color: #ff7300 !important;
 }
 
 .btn-size-1 {
@@ -37,10 +42,8 @@
     float: none !important;
     display: inline !important;
 }
-.custom-switch-form{
-    margin-left: -40px;
-    float: right !important;
-    display: inline-block !important;
+.custom-check-form{
+    margin-bottom: 20px !important;
 }
 
 
@@ -83,18 +86,25 @@
     
 }
 
-.deck-form-label{
+.question-form-label{
     float: left;
+    margin-top: 4px;
+    margin-left: 10px;
+    font-size: medium;
 }
 
-.deck-form-input{
-    margin: auto;
-    height: 45px !important;
-    width: 265px !important;
+.custom-check{
+    height: 25px !important;
+    width: 25px !important;
 }
 
 .user-icon{
     margin-top: 3px;
     float: left !important;
     margin-left: 13px;
+}
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
 }

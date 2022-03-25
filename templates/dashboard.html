@@ -28,7 +28,7 @@
                         <a class="nav-link" href="/decks">Decks</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link" href="#">Quiz</a>
+                        <a class="nav-link" href="/quiz">Quiz</a>
                       </li>
                     </ul>
                     <button class="btn btn-danger logout-button" type="submit" onclick="window.location.href='/logout'"">Logout</button>
@@ -40,6 +40,12 @@
         <br>
         <br>
         <div id="app">
+          <div v-if="!loading" class="app-contents">
+            
+            <img class="user-icon" src="static/img/user_icon.png" alt="user icon" width="20" height="20">
+            <p class="name-tag"><strong>{[ current_user.username ]}</strong></p>
+          </div>
+          <br>
           <div v-if="loading">
             <img stryle="" src="static/img/loader3.gif" alt="loading" width="50" height="50">
         </div>
