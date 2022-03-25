@@ -4,6 +4,7 @@ from sqlalchemy import *
 import random
 import hashlib
 from datetime import datetime
+import os
 #import matplotlib.pyplot as plt
 #import base64
 #from io import BytesIO
@@ -218,3 +219,17 @@ def question_gen(deck_id):
             questions_set.append(question_obj)
     return questions_set
             #print("options generated : ",options)
+
+def export_deck(user_id,deck_id,endpoint):
+    cards = db.session.query(Card).filter(Card.deck_id==deck_id).all()
+    if len(cards) > 0:
+        lines = []
+        for card in cards:
+            question = card.question
+            hint = card.hint
+            answer = card.answer
+            lines.append("{},{},{}\n".format(question,hint,answer))
+        with open("proc/{}.csv".format(endpoint), 'a+') as f:
+            for line in lines:
+                f.write(line)
+            

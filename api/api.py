@@ -2,9 +2,10 @@ from flask_restful import Resource
 from flask import request
 from flask_security import current_user, login_user
 from datetime import datetime
-from controllers.functions_1 import add_card, add_deck, check_if_deck_owner, delete_card, delete_deck, email_exists, get_cards_by_deck, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, load_decks_quiz_selector, question_gen, sha3512, update_deck, username_exists
+from controllers.functions_1 import add_card, add_deck, check_if_deck_owner, delete_card, delete_deck, email_exists, export_deck, get_cards_by_deck, get_decks_for_dashboard, get_decks_for_user, get_user_by_username, load_decks_quiz_selector, question_gen, sha3512, update_deck, username_exists
 from models.models import Card, Deck, User, user_datastore
 from db.database import db
+import time
 
 # USER VALIDATION API
 class UserValAPI(Resource):
@@ -375,6 +376,36 @@ class QuizManager(Resource):
                     return {'authenticated':True,'success':False},200
             else:
                 {"authenticated": False,"username":current_user.username},200
+        else:
+            return {"authenticated": False,"username":None},200
+    def put(self):
+        pass
+    def post(self):
+        pass
+    def delete(self):
+        pass
+
+
+
+# DECKEXPORT API
+class ExportDeck(Resource):
+    def get(self):
+        client = request.headers["user_id"]
+        deck_id = request.headers["deck_id"]
+        print("client : " ,client)
+        print(current_user.id)
+        print(str(current_user.id) == str(client))
+        print("auth in dpa: ",current_user.is_authenticated)
+        if current_user.is_authenticated and str(current_user.id) == str(client):
+            if request.headers['auth-token'] == sha3512(current_user.fs_uniquifier):
+                try:
+                    endpoint = sha3512(str(time.time()))
+                    export_deck(client,deck_id,endpoint)
+                    return {"authenticated": True,'success':True,'endpoint':endpoint},200
+                except:
+                    return {"authenticated": True,'success':False},200
+            else:
+                return {"authenticated": False,"username":current_user.username},200
         else:
             return {"authenticated": False,"username":None},200
     def put(self):

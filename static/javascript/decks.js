@@ -1006,6 +1006,9 @@ const cardsview = Vue.component('cardsview',{
                 <router-link to="/editdeck">
                     <button class="btn btn-primary btn-size-1" @click="set_deck_edit()">Edit Deck</button>
                 </router-link>
+                
+                <button class="btn btn-primary btn-size-1 card-button-3" @click="export_deck()">Export Deck</button>
+        
                 <br>
             </div>
 
@@ -1032,6 +1035,7 @@ const cardsview = Vue.component('cardsview',{
         url_api_whoami:'http://'+window.location.host+'/api-whoami',
         url_dashboard:'http://'+window.location.host+'/dashboard',
         url_api_populate_cardsview:'http://'+window.location.host+'/api-manage-cards',
+        url_api_export_deck:'http://'+window.location.host+'/api-export-deck',
         cards:[],
        }
 
@@ -1087,6 +1091,30 @@ const cardsview = Vue.component('cardsview',{
             });
         },
 
+        export_deck:function(){
+            let auth_token = this.getCookie('auth-token')
+            fetch(this.url_api_export_deck,{method:'GET',headers:{'Content-Type':'application/json','user_id':this.current_user['user_id'],'auth_token':auth_token,'deck_id':this.deck_id},})
+            .then((response)=>{
+                if (!response.ok){
+                    console.log("Response not ok");
+                }
+            return response.json();
+            })
+            .then((data)=>{
+                console.log(data)
+                if (data["success"]){
+                    let link = 'http://'+window.location.host + '/proc-content/'+data["endpoint"];
+                    window.open(link,'_blank')
+                    
+                }
+                else{
+                    alert("Something went wrong")
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            });
+        },
 
         set_deck_delete:function(){
             store.state.current_deck_being_deleted_from = this.deck_id;
