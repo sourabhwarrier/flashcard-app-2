@@ -1,3 +1,4 @@
+from celery_async.celery_async_functions import update_deckstats_async, update_participation_async, update_rating_async
 from flask_restful import Resource
 from flask import request
 from flask_security import current_user, login_user
@@ -403,10 +404,10 @@ class QuizManager(Resource):
                 correct,total = quick_quiz_score(deck_id,submission)
                 percentage = round(correct/total*100,2)
                 if rating:
-                    update_rating(deck_id,rating)
+                    update_rating_async.delay(deck_id,rating)
                 print(deck_id,submission,rating)
-                update_deckstats(client,deck_id,now,percentage)
-                update_participation(client)
+                update_deckstats_async.delay(client,deck_id,now,percentage)
+                update_participation_async.delay(client)
                 return {'authenticated':True,'success':True,'correct':correct,'total':total,'percentage':percentage},200
                 #except:
                 #    return {'authenticated':True,'success':False},200

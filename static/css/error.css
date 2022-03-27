@@ -29,3 +29,9 @@ body{
     width: 150px;
     padding: 10px 30px 10px 30px;
 }
+
+.music-credits{
+    font-size: x-small;
+    float: right !important;
+}
+

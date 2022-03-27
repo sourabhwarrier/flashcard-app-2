@@ -1,6 +1,6 @@
 from celery import Celery
 import time
-from application.configuration import appConfig
+from ...application.configuration import appConfig
 
 # SETUP
 broker_url = appConfig.CELERY_BROKER_URL

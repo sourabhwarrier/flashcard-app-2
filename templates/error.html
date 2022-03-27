@@ -17,6 +17,7 @@
     </head>
     <body>
         <div class="wrap">
+            <p class="music-credits">♫ Jackob Mann - Fiore</p>
         <div class="centered_content">
             <img style="width: 100px; height: 100px;" src="static/img/server.png" alt="crying cheems error page">
             <img style="width: 300px; height: 300px;" src="static/img/cheems.png" alt="crying cheems error page">
@@ -34,18 +35,18 @@
         var playing  = false
         const start = function() {
         if (!playing){
-        console.log("started playing audio")
+        console.log("started playing audio");
         var autoPlayAudio = document.getElementById("fiore");
             autoPlayAudio.muted = false;
             autoPlayAudio.play();
-            playing = true
+            playing = true;
         }
         else{
-            console.log("started playing audio")
+            console.log("paused playing audio");
             var autoPlayAudio = document.getElementById("fiore");
             autoPlayAudio.muted = false;
             autoPlayAudio.pause();
-            playing = false
+            playing = false;
         }
     }
         wrap = document.getElementsByClassName("wrap")[0]

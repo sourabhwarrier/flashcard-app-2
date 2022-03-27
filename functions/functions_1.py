@@ -191,7 +191,12 @@ def load_decks_quiz_selector(user_id):
             'number_of_cards':number_of_cards,
             'deck_id':deck_id,
             'last_reviewed':last_reviewed}
-            deck_list.append(deck_obj)
+            #print("deck is owned : ",str(deck.owner)==str(user_id))
+            #print(deck.owner)
+            #print(user_id)
+            #print("deck is public : ",deck.visibility=='Public')
+            if str(deck.owner) == str(user_id) or deck.visibility == 'Public':
+                deck_list.append(deck_obj)
     return deck_list
 
 
@@ -305,3 +310,21 @@ def update_participation(user_id):
     else:
         db.session.query(Participation).filter(Participation.user_id==user_id).update({'last_revised':now})
         db.session.commit()
+
+
+def to_remind(user_id):
+    participation = db.session.query(Participation).filter(Participation.user_id==user_id).first()
+    if participation == None:
+        return true
+    else:
+        now = int(time.time())
+        last_revised = int(participation.last_revised)
+        if now-last_revised>=61200:
+            return true
+        else:
+            return false
+
+
+def get_all_user_ids():
+    users = db.session.query(User).all()
+    return users

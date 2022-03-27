@@ -7,28 +7,13 @@ from flask_security import Security,login_required,login_user,logout_user,curren
 from flask_security.utils import hash_password
 from flask_restful import Api
 from models.models import User, user_datastore
+from celery_async.celery_async_functions import clean_proc
 import os
 from application.configuration import appConfig
 from db.database import db
 from api.api import CardsAPI, DeckAPI, DeckVisibilityAPI, DecksAPI, ExportDeck, PopulateDashboardAPI, QuizManager, QuizLoader, UserLoginAPI, UserValAPI, WhoamiAPI
-
+from build import app,api,security
 #IMPORTS END
-
-
-# INITIALIZATION BEGIN
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(appConfig)
-    db.init_app(app)
-    api = Api(app)
-    app.app_context().push()
-    app.secret_key = os.urandom(24)
-    return app, api
-
-app,api = create_app()
-security = Security(app,user_datastore)
-
-# INITIALIZATION END
 
 # ROUTE FOR ROOT (LOGIN, SIGNIN, SIGNUP)
 @app.route('/',methods=["GET"])
@@ -98,6 +83,7 @@ def error():
 @app.route('/proc-content/<filename>', methods=["GET"])
 def deck_download(filename):
     try:
+        clean_proc.delay(filename)
         return send_file("proc/{}.csv".format(filename),attachment_filename="deck")
     except:
         return redirect(url_for("error"))
@@ -124,4 +110,4 @@ api.add_resource(ExportDeck,"/api-export-deck")
 
 
 if __name__== "__main__":
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')
