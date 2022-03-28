@@ -60,17 +60,23 @@ class DeckStat(db.Model):
     times_reviewed = Column(db.String,nullable=True)
     average_score = Column(db.String,nullable=True)
 
-class Score(db.Model):
-    __tablename__ = "performances"
+class Rating(db.Model):
+    __tablename__ = "ratings"
     id = Column(db.Integer,primary_key=True,autoincrement=True)
     deck_id = Column(db.Integer, db.ForeignKey("decks.deck_id"),nullable=False)
-    user_id = Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
-    score = Column(db.String,nullable=True)
+    rating = Column(db.String,nullable=False)
 
 class Participation(db.Model):
     __tablename__ = "participation"
     id = Column(db.Integer,primary_key=True,autoincrement=True)
-    deck_id = Column(db.Integer, db.ForeignKey("decks.deck_id"),nullable=False)
     user_id = Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
+    last_revised = Column(db.String,nullable=False)
+
+class Performance(db.Model):
+    __tablename__ = "performances"
+    id = Column(db.Integer,primary_key=True,autoincrement=True)
+    user_id = Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
+    deck_id = Column(db.Integer, db.ForeignKey("decks.deck_id"),nullable=False)
+    score = Column(db.String,nullable=False)
 
 user_datastore = SQLAlchemyUserDatastore(db,User,Role)

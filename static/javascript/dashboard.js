@@ -19,7 +19,8 @@ const deck = Vue.component("deck-stat",{
     <div class="card-body">
         <h5 class="card-title">{[ deck.name ]}</h5>
         <p class="card-text">{[ deck.description ]}</p>
-        <p class="card-text">Average Score : {[ deck.average_score ]}</p>
+        <p class="card-text">Average Score : {[ deck.average_score ]}%</p>
+        <p class="card-text">Rating : {[ deck.rating ]}</p>
         <p class="card-text">Times reviewed : {[ deck.times_reviewed ]}</p>
         <a href="#" class="btn btn-primary card-button-1" @click="opendeck()">Open deck</a>
     </div>

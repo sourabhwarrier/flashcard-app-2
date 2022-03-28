@@ -1006,12 +1006,13 @@ const cardsview = Vue.component('cardsview',{
                 <router-link to="/editdeck">
                     <button class="btn btn-primary btn-size-1" @click="set_deck_edit()">Edit Deck</button>
                 </router-link>
-                
                 <button class="btn btn-primary btn-size-1 card-button-3" @click="export_deck()">Export Deck</button>
-        
                 <br>
             </div>
-
+            <div v-else>
+            <button class="btn btn-primary btn-size-1 card-button-3" @click="export_deck()">Export Deck</button>
+            <br>
+            </div>
             <div v-if="cards.length==0">
             <br>
             <br>
@@ -1078,13 +1079,19 @@ const cardsview = Vue.component('cardsview',{
             return response.json();
             })
             .then((data)=>{
-                console.log(this.cards)
+                if (data["authenticated"]){
+                    console.log(this.cards)
                 this.cards = data["cards"]
                 this.deck_name=data['deck_name']
                 this.deck_description=data['deck_description']
                 this.visibility=data['visibility']
                 this.editable=data['editable']
                 this.loading=false
+                }
+                else{
+                    alert("This resource is now private");
+                    window.location.href = 'http://'+window.location.host + '/dashboard';
+                }
             })
             .catch((error)=>{
                 console.log(error);

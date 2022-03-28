@@ -11,6 +11,10 @@ const store = new Vuex.Store({
         submissions:[],
         showquiz:false,
         showsubmit:false,
+        showresult:false,
+        correct:null,
+        total:null,
+        percentage:null
     }
 });
 
@@ -134,7 +138,7 @@ const question = Vue.component("question",{
                 }
             }
             if (flag){
-                reply = undefined;
+                reply = null;
             }
             console.log("responded : "+reply);
             console.log("card_id : "+card_id);
@@ -195,12 +199,12 @@ const question = Vue.component("question",{
 // CONFIRMATION COMPONENT START
 const confirmation = Vue.component("confirmation",{
     // COMPONENT PROPS
-    //props:["deck","current_user", "index"],
+    props:["current_user"],
 
     // COMPONENT DATA
     data:function(){
         return{
-           
+            url_api_quiz:'http://'+window.location.host+'/api-quiz',
         }
     },
     // COMPONENT DELIMITER
@@ -248,6 +252,7 @@ const confirmation = Vue.component("confirmation",{
     methods:{
 
         process:function(){
+            let auth_token = this.getCookie('auth-token')
             flag = true;
             checks = document.getElementsByClassName("custom-check");
             //console.log(checks.length) // debug
@@ -259,16 +264,43 @@ const confirmation = Vue.component("confirmation",{
                 }
             }
             if (flag){
-                rating = undefined;
+                rating = null;
             }
             submission=store.state.submissions;
             deck_id=store.state.current_deck_being_quizzed_on
 
             // FETCH API POST TO QUIZ
-
-
-
-
+            fetch(this.url_api_quiz,{method:'POST',headers:{'Content-Type':'application/json','user_id':this.current_user['user_id'],'auth_token':auth_token},
+            body:JSON.stringify({'deck_id':deck_id,'submission':submission,'rating':rating})})
+            .then((response)=>{
+                if (!response.ok){
+                    console.log("Response not ok");
+                    alert("Something went wrong")
+                }
+            return response.json();
+            })
+            .then((data)=>{
+                if (data['authenticated'] && data['success']){
+                    console.log(data);
+                    console.log("submission successful!");
+                    console.log("correct : "+ data["correct"]);
+                    console.log("total : "+ data["total"]);
+                    store.state.correct=data["correct"];
+                    store.state.total=data["total"];
+                    store.state.percentage=data["percentage"];
+                    store.state.showresult=true;
+                    store.state.showsubmit=false;
+                    store.state.showquiz=false;
+                }
+                else{
+                    console.log(data)
+                    alert("could not update score")
+                    window.location.href = 'http://'+window.location.host + '/dashboard';
+                }
+            })
+            .catch((error)=>{
+                console.log(error);
+            });
 
             // CLEANING UP
             console.log("rated : "+rating)
@@ -308,6 +340,94 @@ const confirmation = Vue.component("confirmation",{
         }
     }
 })
+
+
+
+
+// RESULT COMPONENT START
+const result = Vue.component("result",{
+    // COMPONENT PROPS
+    //props:["current_user"],
+
+    // COMPONENT DATA
+    data:function(){
+        return{
+            
+        }
+    },
+    // COMPONENT DELIMITER
+    delimiters:["{[","]}"],
+    
+    // COMPONENT TEMPLATE
+    template:`
+    <div class="card text-center table-view">
+        <div class="card-body">
+            <br>
+            <br>
+            <h4>You answered {[ correct ]} questions correctly out of {[ total ]}!</h4>
+            <br>
+            <br>
+            <h4>Your score is {[ percentage ]}%</h4>
+            <br>
+            <br>
+        <button class="btn btn-primary card-button-2" @click="submit()">Okay</button>
+        </div>
+    </div>
+    `,
+
+    //COMPONENT METHODS
+    methods:{
+
+        submit:function(){
+            window.location.href = 'http://'+window.location.host + '/dashboard';
+        },
+
+        getCookie:function(cname) {
+            let name = cname + "=";
+            let ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+              let c = ca[i];
+              while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+              }
+              if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+              }
+            }
+            return null;
+          },
+    },
+
+    computed:{
+        correct:function(){
+            return store.state.correct;
+        },
+
+        total:function(){
+        return store.state.total;
+        },
+
+        percentage:function(){
+            return store.state.percentage;
+        }
+    },
+
+    destroyed:function(){
+        store.state.number_of_questions=null,
+        store.state.current_index=null,
+        store.state.current_deck_being_quizzed_on=null,
+        store.state.current_deck_name_being_quizzed_on=null,
+        store.state.submissions=[],
+        store.state.showquiz=false,
+        store.state.showsubmit=false,
+        store.state.showresult=false,
+        store.state.correct=null,
+        store.state.total=null,
+        store.state.percentage=null
+    }
+})
+
+
 
 
 // DECKSVIEW COMPONENT START
@@ -439,7 +559,10 @@ const quizinterface = Vue.component('quizinterface',{
             <question :questions="questions" :length="length"></question>
         </div>
         <div v-else-if="showsubmit">
-            <confirmation></confirmation>
+            <confirmation :current_user="current_user"></confirmation>
+        </div> 
+        <div v-else-if="showresult">
+            <result></result>
         </div> 
         </div>   
     </div>
@@ -554,6 +677,10 @@ const quizinterface = Vue.component('quizinterface',{
 
         showquiz:function(){
             return store.state.showquiz;
+        },
+
+        showresult:function(){
+            return store.state.showresult;
         }
     },
 

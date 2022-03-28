@@ -1,33 +1,19 @@
 #IMPORTS BEGIN
 from crypt import methods
 from distutils.log import debug
-from controllers.functions_1 import get_decks_for_dashboard, get_user_by_username, sha3512
+from functions.functions_1 import get_decks_for_dashboard, get_user_by_username, sha3512
 from flask import Flask,session,render_template,request,redirect,g,url_for,send_file
 from flask_security import Security,login_required,login_user,logout_user,current_user
 from flask_security.utils import hash_password
 from flask_restful import Api
 from models.models import User, user_datastore
+from celery_async.celery_async_functions import clean_proc
 import os
 from application.configuration import appConfig
 from db.database import db
 from api.api import CardsAPI, DeckAPI, DeckVisibilityAPI, DecksAPI, ExportDeck, PopulateDashboardAPI, QuizManager, QuizLoader, UserLoginAPI, UserValAPI, WhoamiAPI
-
+from build import app,api,security
 #IMPORTS END
-
-
-# INITIALIZATION BEGIN
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(appConfig)
-    db.init_app(app)
-    api = Api(app)
-    app.app_context().push()
-    app.secret_key = os.urandom(24)
-    return app, api
-    
-app,api = create_app()
-security = Security(app,user_datastore)
-# INITIALIZATION END
 
 # ROUTE FOR ROOT (LOGIN, SIGNIN, SIGNUP)
 @app.route('/',methods=["GET"])
@@ -44,7 +30,7 @@ def root():
 # ROUTE FOR DASHBOARD
 @app.route('/dashboard',methods=["GET"])
 def dashboard():
-    try:
+    #try:
         if current_user.is_authenticated:
             print("User logged in : ",current_user.is_authenticated, " as : ", current_user.username)
             print(get_decks_for_dashboard(current_user.id))
@@ -52,8 +38,9 @@ def dashboard():
         else:
             print("User logged in : ",current_user.is_authenticated)
             return redirect(url_for("root"))
-    except:
-        return redirect(url_for("error"))
+    #except:
+    #
+    #    return redirect(url_for("error"))
 
 
 # ROUTE FOR decks
@@ -96,7 +83,8 @@ def error():
 @app.route('/proc-content/<filename>', methods=["GET"])
 def deck_download(filename):
     try:
-        return send_file("proc/{}.csv".format(filename),attachment_filename="deck")
+        clean_proc.delay(filename)
+        return send_file("proc/{}.csv".format(filename),attachment_filename="deck.csv")
     except:
         return redirect(url_for("error"))
 
@@ -122,4 +110,4 @@ api.add_resource(ExportDeck,"/api-export-deck")
 
 
 if __name__== "__main__":
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')

@@ -5,3 +5,5 @@ matplotlib
 email-validator
 bcrypt
 celery
+redis
+secure-smtplib
