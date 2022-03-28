@@ -149,7 +149,7 @@ def update_deck(deck_id,deck_name,deck_description,deck_visibility):
     db.session.commit()
 
 def delete_deck(deck_id):
-    delete_ratings(deck_id)
+    delete_rating(deck_id)
     delete_deckstats(deck_id)
     for card in get_cards_by_deck(deck_id):
         delete_card(card['card_id'])
@@ -264,7 +264,7 @@ def update_rating(deck_id,rating):
     db.session.add(rating_obj)
     db.session.commit()
 
-def delete_ratings(deck_id):
+def delete_rating(deck_id):
     db.session.query(Rating).filter(Rating.deck_id==deck_id).delete()
     db.session.commit()
 

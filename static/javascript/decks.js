@@ -1006,12 +1006,13 @@ const cardsview = Vue.component('cardsview',{
                 <router-link to="/editdeck">
                     <button class="btn btn-primary btn-size-1" @click="set_deck_edit()">Edit Deck</button>
                 </router-link>
-                
                 <button class="btn btn-primary btn-size-1 card-button-3" @click="export_deck()">Export Deck</button>
-        
                 <br>
             </div>
-
+            <div v-else>
+            <button class="btn btn-primary btn-size-1 card-button-3" @click="export_deck()">Export Deck</button>
+            <br>
+            </div>
             <div v-if="cards.length==0">
             <br>
             <br>

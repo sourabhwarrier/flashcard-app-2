@@ -17,4 +17,4 @@ def send_reminder(email,username):
         smtp.login(SENDER,APP_PASSWORD)        
         smtp.send_message(msg)
 
-send_reminder("sourabhw7@gmail.com","sourabh")
+#send_reminder("sourabhw7@gmail.com","sourabh")

@@ -84,7 +84,7 @@ def error():
 def deck_download(filename):
     try:
         clean_proc.delay(filename)
-        return send_file("proc/{}.csv".format(filename),attachment_filename="deck")
+        return send_file("proc/{}.csv".format(filename),attachment_filename="deck.csv")
     except:
         return redirect(url_for("error"))
 

@@ -1,11 +1,11 @@
 
-from functions.functions_1 import format_datetime, get_all_user_ids, to_remind, update_participation, update_rating,update_deckstats
+from functions.functions_1 import format_datetime, get_all_user_ids, get_decks_for_dashboard, to_remind, update_participation, update_rating,update_deckstats
 import time
 import os
 
-from models.models import DeckStat, Rating
 from build import celery
 from coms.mailman import send_reminder
+from coms.reportgen import generate_report
 
 
 # FUNCTIONS BEGIN
@@ -29,13 +29,22 @@ def clean_proc(filename):
 @celery.task(name="reminder_async")
 def reminder_async():
     print("{} : Async Job Dispatch: Daily Reminders".format(format_datetime(time.time())))
-    #users = get_all_user_ids()
-    #if users != []:
-    #    for user in users:
-    #        if to_remind(user.id):
-    send_reminder("sourabhw7@gmail.com","Sourabh")
+    users = get_all_user_ids()
+    if users != []:
+        for user in users:
+            if to_remind(user.id):
+                send_reminder(user.email,user.username)
 
 @celery.task(name="dispatch_monthly_report")
 def dispatch_monthly_report():
     users = get_all_user_ids()
+    for user in users:
+        deckstats = get_decks_for_dashboard(user.id)
+        username = user.username
+        email = user.email
+        date = format_datetime(time.time())[:11]
+        filenames = ["{}_monthly_report_{}.html".format(username,date),"{}_monthly_report_{}.pdf".format(username,date)]
+        generate_report(username,deckstats,date)
+
+
     
