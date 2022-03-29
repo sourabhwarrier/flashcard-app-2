@@ -1,2 +1,2 @@
 # flashcard-app-2
-Flash Card Application for Modern Application Development II 
+Flash Card Application V2 for Modern Application Development II Final Project
