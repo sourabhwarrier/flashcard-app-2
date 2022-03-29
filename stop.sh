@@ -1,0 +1,1 @@
+ps | awk '/celery/{c[$1]=$1}/python/{p[$1]=$1}/redis-server/{r[$1]=$1}END{for (i in c){system("kill -9 "i)};for (i in p){system("kill -9 "i)};for (i in r){system("kill -9 "i)}}'

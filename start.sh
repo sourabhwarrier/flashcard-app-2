@@ -35,4 +35,3 @@ echo "application_process_id ${fpid}" >> pids
 cat pids
 printf "_______________________________________________________"
 printf "\n"
-
