@@ -1,3 +1,3 @@
-celery_process_id 33021
-redis_server_process_id 33014
-application_process_id 33025
+celery_process_id 
+redis_server_process_id 
+application_process_id 
