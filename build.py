@@ -39,11 +39,11 @@ def make_celery(app):
     celery.conf.beat_schedule = {
     "daily-reminder-async": {
     "task": "reminder_async",
-    "schedule": crontab(minute="0",hour="0"),
+    "schedule": crontab(minute="28",hour="15"),
      },
     "dispatch_monthly_report": {
     "task": "dispatch_monthly_report",
-    "schedule": crontab(minute="0", hour="0"),
+    "schedule": crontab(minute="28", hour="15"),
      },
     }
 

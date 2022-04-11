@@ -36,7 +36,7 @@ def reminder_async():
     if users != []:
         for user in users: 
             if to_remind(user.id):
-                send_reminder("sourabhw7@gmail.com",user.username)
+                send_reminder("21f1002852@student.onlinedegree.iitm.ac.in",user.username)
 
 # FIXED
 @celery.task(name="dispatch_monthly_report")
@@ -49,7 +49,7 @@ def dispatch_monthly_report():
         date = format_datetime(time.time())[:11]
         generate_report(username,deckstats,date)
         filename="{}_monthly_report_{}".format(username,date)
-        send_report("sourabhw7@gmail.com",username,filename)
+        send_report("21f1002852@student.onlinedegree.iitm.ac.in",username,filename)
     os.system("rm proc/*html")
     os.system("rm proc/*pdf")
     
