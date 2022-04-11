@@ -1,8 +1,8 @@
 import smtplib
 from email.message import EmailMessage
 
-SENDER = "flashstudyv2@gmail.com"
-APP_PASSWORD = "blwmbozsrepcohge"
+SENDER = "<your-email>"
+APP_PASSWORD = "<your-app-password."
 
 def send_reminder(email,username):
     msg = EmailMessage()
