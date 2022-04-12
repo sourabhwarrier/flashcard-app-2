@@ -692,7 +692,17 @@ const quizinterface = Vue.component('quizinterface',{
 })
 
 
-
+const notfound = Vue.component('notfound',{
+    // COMPONENT DELIMITER
+    delimiters:["{[","]}"],
+   
+    // COMPONENT TEMPLATE
+    template:`
+    <div>
+        <h1>404</h1>
+    </div>
+    `,
+})
 
 
 
@@ -706,7 +716,12 @@ const routes = [
     {
         path:'/active',
         component:quizinterface,
-    },   
+    },
+    
+    {
+        path:'/*',
+        component:notfound,
+    },
 ]
 
 // ROUTER

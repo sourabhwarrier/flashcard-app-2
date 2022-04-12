@@ -216,6 +216,8 @@ const card = Vue.component("card",{
     data:function(){
         return{
             //current_visibility:this.deck.visibility,
+            show:false,
+            btn_text:'Show',
             deck_id:this.card.deck_id,
             user_id:this.current_user.user_id,
         }
@@ -234,7 +236,8 @@ const card = Vue.component("card",{
         <em class="card-text">({[ card.hint ]})</em>
         <br>
         <br>
-        <p class="card-text">{[ card.answer ]}</p>
+        <p v-if="show" class="card-text">{[ card.answer ]}</p>
+        <button class="btn btn-primary card-button-1" @click="show_ans()">{[ btn_text ]}</button>
         </div>
         <div class="card-footer text-muted">
             From {[ card.deck_name ]}
@@ -244,6 +247,11 @@ const card = Vue.component("card",{
 
     //COMPONENT METHODS
     methods:{
+
+        show_ans:function(){
+            this.show = !this.show;
+            this.btn_text = this.show ? "Hide" : "Show";
+        },
 
         getCookie:function(cname) {
             let name = cname + "=";
@@ -980,7 +988,6 @@ const deletedecks = Vue.component('deletedecks',{
 })
 
 
-
 // CARDSVIEW COMPONENT START
 const cardsview = Vue.component('cardsview',{
 
@@ -1523,6 +1530,18 @@ const deletecards = Vue.component('deletecards',{
 
 
 
+const notfound = Vue.component('notfound',{
+     // COMPONENT DELIMITER
+     delimiters:["{[","]}"],
+    
+     // COMPONENT TEMPLATE
+     template:`
+     <div>
+         <h1>404</h1>
+     </div>
+     `,
+})
+
 
 
 // ROUTES
@@ -1560,6 +1579,11 @@ const routes = [
     {
         path:'/deletecards',
         component:deletecards,
+    },
+
+    {
+        path:'/*',
+        component:notfound,
     },
     
 

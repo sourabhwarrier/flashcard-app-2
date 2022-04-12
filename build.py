@@ -7,6 +7,7 @@ from models.models import user_datastore
 import os
 from application.configuration import appConfig
 from db.database import db
+from celery.schedules import crontab
 
 #IMPORTS END
 
@@ -33,6 +34,20 @@ def make_celery(app):
         broker=app.config['CELERY_BROKER_URL'],
     )
     celery.conf.update(app.config)
+    celery.conf.enable_utc = False
+    celery.conf.time_zone = "Asia/Kolkata"
+    celery.conf.beat_schedule = {
+    "daily-reminder-async": {
+    "task": "reminder_async",
+    "schedule": crontab(minute="28",hour="15"),
+     },
+    "dispatch_monthly_report": {
+    "task": "dispatch_monthly_report",
+    "schedule": crontab(minute="28", hour="15"),
+     },
+    }
+
+
 
     class ContextTask(celery.Task):
         def __call__(self, *args, **kwargs):

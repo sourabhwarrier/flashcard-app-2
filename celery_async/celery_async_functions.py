@@ -4,7 +4,7 @@ import time
 import os
 
 from build import celery
-from coms.mailman import send_reminder
+from coms.mailman import send_reminder, send_report
 from coms.reportgen import generate_report
 
 
@@ -23,6 +23,9 @@ def update_participation_async(client):
 
 @celery.task(name="clean_proc")
 def clean_proc(filename):
+    #send_reminder("sourabhw7@gmail.com","sourabh") # remove later
+    #reminder_async()                                # remove later
+    #dispatch_monthly_report()                       # remove later
     time.sleep(10)
     os.system("rm proc/{}.csv".format(filename))
 
@@ -31,10 +34,11 @@ def reminder_async():
     print("{} : Async Job Dispatch: Daily Reminders".format(format_datetime(time.time())))
     users = get_all_user_ids()
     if users != []:
-        for user in users:
+        for user in users: 
             if to_remind(user.id):
-                send_reminder(user.email,user.username)
+                send_reminder("21f1002852@student.onlinedegree.iitm.ac.in",user.username)
 
+# FIXED
 @celery.task(name="dispatch_monthly_report")
 def dispatch_monthly_report():
     users = get_all_user_ids()
@@ -43,8 +47,9 @@ def dispatch_monthly_report():
         username = user.username
         email = user.email
         date = format_datetime(time.time())[:11]
-        filenames = ["{}_monthly_report_{}.html".format(username,date),"{}_monthly_report_{}.pdf".format(username,date)]
         generate_report(username,deckstats,date)
-
-
+        filename="{}_monthly_report_{}".format(username,date)
+        send_report("21f1002852@student.onlinedegree.iitm.ac.in",username,filename)
+    os.system("rm proc/*html")
+    os.system("rm proc/*pdf")
     
