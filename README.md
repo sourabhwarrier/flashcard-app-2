@@ -44,11 +44,35 @@ Flashcard App V2 is a web-based application developed as the final project for t
    pip install -r requirements.txt
 
 4. **Set Up Environment Variables**:
-  Create a .env file in the project root directory and define the necessary environment variables, such as database URI, email server settings, and secret keys.
+   Create a .env file in the project root directory and define the necessary environment variables, such as database URI, email server settings, and secret keys.
 
-5. **Initialize the Database**:
-   ```bash
-   flask db init
-   flask db migrate
-   flask db upgrade
+5. **Start Application**:
+    ```bash
+   source start.sh
+
+## API Dcoumentation
+
+  For detailed information about the API endpoints, request/response formats, and usage examples, refer to the APIDOC.txt file included in the repository.
+
+## Project Structure
+    flashcard-app-2/
+    ├── api/                # API endpoints and resources
+    ├── application/        # Application configurations and initialization
+    ├── celery_async/       # Celery task definitions
+    ├── db/                 # Database models and migrations
+    ├── static/             # Static files (CSS, JavaScript, images)
+    ├── templates/          # HTML templates
+    ├── app.py              # Main application entry point
+    ├── requirements.txt    # Python dependencies
+    ├── start.sh            # Shell script to start the application
+    └── stop.sh             # Shell script to stop the application
+
+## License
+  This project is licensed under the MIT License. See the LICENSE file for more details.
+
+## Acknowledgments
+  - **Creator** : @sourabhwarrier
+  - **Course** : Modern Application Development II, IITM DSA
+  - **Date** : March 2022
+  
 
