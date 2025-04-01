@@ -44,9 +44,10 @@ Flashcard App V2 is a web-based application developed as the final project for t
    pip install -r requirements.txt
 
 4. **Set Up Environment Variables**:
+
    Create a .env file in the project root directory and define the necessary environment variables, such as database URI, email server settings, and secret keys.
 
-5. **Start Application**:
+6. **Start Application**:
     ```bash
    source start.sh
 
